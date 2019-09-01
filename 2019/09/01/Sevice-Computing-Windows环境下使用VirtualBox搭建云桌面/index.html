@@ -78,7 +78,7 @@
 <meta property="og:image" content="https://img-blog.csdnimg.cn/20190901113954687.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1doaXRlM3p6,size_16,color_FFFFFF,t_70">
 <meta property="og:image" content="https://img-blog.csdnimg.cn/20190901114319665.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1doaXRlM3p6,size_16,color_FFFFFF,t_70">
 <meta property="og:image" content="https://img-blog.csdnimg.cn/20190901114419523.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1doaXRlM3p6,size_16,color_FFFFFF,t_70">
-<meta property="og:updated_time" content="2019-09-01T06:07:35.110Z">
+<meta property="og:updated_time" content="2019-09-01T06:09:24.441Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Sevice Computing - Windows环境下使用VirtualBox搭建云桌面">
 <meta name="twitter:description" content="这是我在服务计算课程学习中的第一次实验，记录了我跟随老师的教程一步一步的在Windows环境下使用VirtualBox搭建云桌面的过程，过程虽并不难，但也遇到了一些小问题。  实验目的 初步了解虚拟化技术，理解云计算的相关概念 理解系统工程师面临的困境 理解自动化安装、管理（DevOps）在云应用中的重要性">
@@ -276,7 +276,7 @@
                 
               
 
-              <time title="创建时间：2019-09-01 12:44:38 / 修改时间：14:07:35" itemprop="dateCreated datePublished" datetime="2019-09-01T12:44:38+08:00">2019-09-01</time>
+              <time title="创建时间：2019-09-01 12:44:38 / 修改时间：14:09:24" itemprop="dateCreated datePublished" datetime="2019-09-01T12:44:38+08:00">2019-09-01</time>
             </span>
           
             
@@ -369,7 +369,7 @@
 <li>可以看到，成功连接了centos_base和centos_temp两台虚拟机。</li>
 <li>至此，实验完成。</li>
 </ul>
-<h4 id="实验难点（“坑”）"><a href="#实验难点（“坑”）" class="headerlink" title="实验难点（“坑”）"></a>实验难点（“坑”）</h4><ul>
+<h4 id="实验难点-“坑”"><a href="#实验难点-“坑”" class="headerlink" title="实验难点(“坑”)"></a>实验难点(“坑”)</h4><ul>
 <li>在使用Windows远程桌面连接虚拟机时，不可以想当然的去用我们刚刚为虚拟机配置的IP地址，而是要使用的是宿主机的IP地址，不是子机，即我们最初为VirtualBox配置的网卡IP地址：192.168.100.1。经过测试，我发现使用主机的自身IP地址（例如无线网卡地址也是可以的）</li>
 <li>在虚拟机中对于 enp0s8 设置IP地址时，不要直接设置为我们最初设置的网卡地址192.168.100.1/24，而应该使其位于同一网段下即可，即保持前24位一致。否则，会出现ssh时无法连接的情况。</li>
 </ul>
@@ -450,7 +450,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#实验目的"><span class="nav-number">1.</span> <span class="nav-text">实验目的</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#实验环境与要求"><span class="nav-number">2.</span> <span class="nav-text">实验环境与要求</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#实验步骤及结果"><span class="nav-number">3.</span> <span class="nav-text">实验步骤及结果</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#安装VirtualBox"><span class="nav-number">3.1.</span> <span class="nav-text">安装VirtualBox</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#创建并配置Centos虚拟机"><span class="nav-number">3.2.</span> <span class="nav-text">创建并配置Centos虚拟机</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#复制Centos虚拟机"><span class="nav-number">3.3.</span> <span class="nav-text">复制Centos虚拟机</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#测试两个虚拟机"><span class="nav-number">3.4.</span> <span class="nav-text">测试两个虚拟机</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#配置用远程桌面访问你的虚拟机"><span class="nav-number">3.5.</span> <span class="nav-text">配置用远程桌面访问你的虚拟机</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#实验难点（“坑”）"><span class="nav-number">4.</span> <span class="nav-text">实验难点（“坑”）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#实验心得"><span class="nav-number">5.</span> <span class="nav-text">实验心得</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#实验目的"><span class="nav-number">1.</span> <span class="nav-text">实验目的</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#实验环境与要求"><span class="nav-number">2.</span> <span class="nav-text">实验环境与要求</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#实验步骤及结果"><span class="nav-number">3.</span> <span class="nav-text">实验步骤及结果</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#安装VirtualBox"><span class="nav-number">3.1.</span> <span class="nav-text">安装VirtualBox</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#创建并配置Centos虚拟机"><span class="nav-number">3.2.</span> <span class="nav-text">创建并配置Centos虚拟机</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#复制Centos虚拟机"><span class="nav-number">3.3.</span> <span class="nav-text">复制Centos虚拟机</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#测试两个虚拟机"><span class="nav-number">3.4.</span> <span class="nav-text">测试两个虚拟机</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#配置用远程桌面访问你的虚拟机"><span class="nav-number">3.5.</span> <span class="nav-text">配置用远程桌面访问你的虚拟机</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#实验难点-“坑”"><span class="nav-number">4.</span> <span class="nav-text">实验难点(“坑”)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#实验心得"><span class="nav-number">5.</span> <span class="nav-text">实验心得</span></a></li></ol></div>
         
       </div>
       <!--/noindex-->

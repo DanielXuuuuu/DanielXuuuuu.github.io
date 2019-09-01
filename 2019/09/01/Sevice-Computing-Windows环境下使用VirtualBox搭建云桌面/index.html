@@ -55,13 +55,13 @@
   };
 </script>
 
-  <meta name="description" content="这是我在服务计算课程学习中的第一次实验，记录了我跟随老师的教程一步一步的在Windows环境下使用VirtualBox搭建云桌面的过程，过程虽并不难，但也遇到了一些小问题。">
+  <meta name="description" content="这是我在服务计算课程学习中的第一次实验，记录了我跟随老师的教程一步一步的在Windows环境下使用VirtualBox搭建云桌面的过程，过程虽并不难，但也遇到了一些小问题。  实验目的 初步了解虚拟化技术，理解云计算的相关概念 理解系统工程师面临的困境 理解自动化安装、管理（DevOps）在云应用中的重要性">
 <meta name="keywords" content="云桌面,服务计算,CentOS,ssh">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Sevice Computing - Windows环境下使用VirtualBox搭建云桌面">
 <meta property="og:url" content="http://yoursite.com/2019/09/01/Sevice-Computing-Windows环境下使用VirtualBox搭建云桌面/index.html">
 <meta property="og:site_name" content="Daniel&#39;s Blog">
-<meta property="og:description" content="这是我在服务计算课程学习中的第一次实验，记录了我跟随老师的教程一步一步的在Windows环境下使用VirtualBox搭建云桌面的过程，过程虽并不难，但也遇到了一些小问题。">
+<meta property="og:description" content="这是我在服务计算课程学习中的第一次实验，记录了我跟随老师的教程一步一步的在Windows环境下使用VirtualBox搭建云桌面的过程，过程虽并不难，但也遇到了一些小问题。  实验目的 初步了解虚拟化技术，理解云计算的相关概念 理解系统工程师面临的困境 理解自动化安装、管理（DevOps）在云应用中的重要性">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="https://img-blog.csdnimg.cn/20190901101648126.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1doaXRlM3p6,size_16,color_FFFFFF,t_70">
 <meta property="og:image" content="https://img-blog.csdnimg.cn/20190901102017272.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1doaXRlM3p6,size_16,color_FFFFFF,t_70">
@@ -78,10 +78,10 @@
 <meta property="og:image" content="https://img-blog.csdnimg.cn/20190901113954687.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1doaXRlM3p6,size_16,color_FFFFFF,t_70">
 <meta property="og:image" content="https://img-blog.csdnimg.cn/20190901114319665.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1doaXRlM3p6,size_16,color_FFFFFF,t_70">
 <meta property="og:image" content="https://img-blog.csdnimg.cn/20190901114419523.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1doaXRlM3p6,size_16,color_FFFFFF,t_70">
-<meta property="og:updated_time" content="2019-09-01T05:00:53.496Z">
+<meta property="og:updated_time" content="2019-09-01T05:07:40.758Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Sevice Computing - Windows环境下使用VirtualBox搭建云桌面">
-<meta name="twitter:description" content="这是我在服务计算课程学习中的第一次实验，记录了我跟随老师的教程一步一步的在Windows环境下使用VirtualBox搭建云桌面的过程，过程虽并不难，但也遇到了一些小问题。">
+<meta name="twitter:description" content="这是我在服务计算课程学习中的第一次实验，记录了我跟随老师的教程一步一步的在Windows环境下使用VirtualBox搭建云桌面的过程，过程虽并不难，但也遇到了一些小问题。  实验目的 初步了解虚拟化技术，理解云计算的相关概念 理解系统工程师面临的困境 理解自动化安装、管理（DevOps）在云应用中的重要性">
 <meta name="twitter:image" content="https://img-blog.csdnimg.cn/20190901101648126.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1doaXRlM3p6,size_16,color_FFFFFF,t_70">
   <link rel="canonical" href="http://yoursite.com/2019/09/01/Sevice-Computing-Windows环境下使用VirtualBox搭建云桌面/">
 
@@ -276,7 +276,7 @@
                 
               
 
-              <time title="创建时间：2019-09-01 12:44:38 / 修改时间：13:00:53" itemprop="dateCreated datePublished" datetime="2019-09-01T12:44:38+08:00">2019-09-01</time>
+              <time title="创建时间：2019-09-01 12:44:38 / 修改时间：13:07:40" itemprop="dateCreated datePublished" datetime="2019-09-01T12:44:38+08:00">2019-09-01</time>
             </span>
           
             
@@ -306,8 +306,6 @@
               <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
             </span>
           
-            <div class="post-description">这是我在服务计算课程学习中的第一次实验，记录了我跟随老师的教程一步一步的在Windows环境下使用VirtualBox搭建云桌面的过程，过程虽并不难，但也遇到了一些小问题。</div>
-          
 
         </div>
       </header>
@@ -318,7 +316,10 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h4 id="实验目的"><a href="#实验目的" class="headerlink" title="实验目的"></a>实验目的</h4><ul>
+        <blockquote>
+<p>这是我在服务计算课程学习中的第一次实验，记录了我跟随老师的教程一步一步的在Windows环境下使用VirtualBox搭建云桌面的过程，过程虽并不难，但也遇到了一些小问题。</p>
+</blockquote>
+<h4 id="实验目的"><a href="#实验目的" class="headerlink" title="实验目的"></a>实验目的</h4><ul>
 <li>初步了解虚拟化技术，理解云计算的相关概念</li>
 <li>理解系统工程师面临的困境</li>
 <li>理解自动化安装、管理（DevOps）在云应用中的重要性</li>
@@ -401,22 +402,6 @@
 
         
 
-          <div class="post-nav">
-            <div class="post-nav-next post-nav-item">
-              
-                <a href="/2019/08/30/hello-world/" rel="next" title="Hello World">
-                  <i class="fa fa-chevron-left"></i> Hello World
-                </a>
-              
-            </div>
-
-            <span class="post-nav-divider"></span>
-
-            <div class="post-nav-prev post-nav-item">
-              
-            </div>
-          </div>
-        
       </footer>
     
   </div>
@@ -479,7 +464,7 @@
         
           <a href="/archives/">
         
-          <span class="site-state-item-count">2</span>
+          <span class="site-state-item-count">1</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -519,9 +504,7 @@
         
           
         
-          
-        
-        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-count">4</span>
         <span class="site-state-item-name">标签</span>
         </a>
       </div>

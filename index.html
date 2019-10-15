@@ -25,11 +25,11 @@
   var NexT = window.NexT || {};
   var CONFIG = {
     root: '/',
-    scheme: 'Gemini',
+    scheme: 'Muse',
     version: '7.3.0',
     exturl: false,
     sidebar: {"position":"left","display":"post","offset":12,"onmobile":false},
-    copycode: {"enable":false,"show_result":false,"style":null},
+    copycode: {"enable":true,"show_result":true,"style":"mac"},
     back2top: {"enable":true,"sidebar":false,"scrollpercent":true},
     bookmark: {"enable":false,"color":"#222","save":"auto"},
     fancybox: false,
@@ -43,7 +43,7 @@
       hits: {"per_page":10},
       labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
     },
-    localsearch: {"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
     path: '',
     motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
     translation: {
@@ -203,9 +203,38 @@
     <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
 
   </li>
+      <li class="menu-item menu-item-search">
+        <a href="javascript:;" class="popup-trigger">
+        
+          <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+      </li>
+    
   </ul>
 
+    
+
 </nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
 </div>
     </header>
 
@@ -221,8 +250,6 @@
     <main id="main" class="main">
       <div class="main-inner">
         <div class="content-wrap">
-            
-
           <div id="content" class="content">
             
   <div id="posts" class="posts-expand">
@@ -310,7 +337,7 @@
           <!--noindex-->
           
             <div class="post-button text-center">
-              <a class="btn" href="/2019/10/06/3D-Game-Programming-Design-与游戏世界交互/#more" rel="contents">
+              <a class="btn" href="/2019/10/06/3D-Game-Programming-Design-与游戏世界交互/" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -421,7 +448,7 @@
           <!--noindex-->
           
             <div class="post-button text-center">
-              <a class="btn" href="/2019/09/22/3D-Game-Programming-Design-游戏对象与图形基础/#more" rel="contents">
+              <a class="btn" href="/2019/09/22/3D-Game-Programming-Design-游戏对象与图形基础/" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -533,7 +560,7 @@
           <!--noindex-->
           
             <div class="post-button text-center">
-              <a class="btn" href="/2019/09/16/3D-Game-Programming-Design-空间与运动/#more" rel="contents">
+              <a class="btn" href="/2019/09/16/3D-Game-Programming-Design-空间与运动/" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -641,7 +668,7 @@
           <!--noindex-->
           
             <div class="post-button text-center">
-              <a class="btn" href="/2019/09/12/初次接触Go语言/#more" rel="contents">
+              <a class="btn" href="/2019/09/12/初次接触Go语言/" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -749,7 +776,7 @@
           <!--noindex-->
           
             <div class="post-button text-center">
-              <a class="btn" href="/2019/09/10/Sevice-Computing-在Linux中安装配置Go开发环境/#more" rel="contents">
+              <a class="btn" href="/2019/09/10/Sevice-Computing-在Linux中安装配置Go开发环境/" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -857,7 +884,7 @@
           <!--noindex-->
           
             <div class="post-button text-center">
-              <a class="btn" href="/2019/09/04/3D-Game-Programming-Design-离散仿真引擎基础/#more" rel="contents">
+              <a class="btn" href="/2019/09/04/3D-Game-Programming-Design-离散仿真引擎基础/" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -965,7 +992,7 @@
           <!--noindex-->
           
             <div class="post-button text-center">
-              <a class="btn" href="/2019/09/01/Human Resource Machine - 一款杂糅了编程元素的另类解谜游戏/#more" rel="contents">
+              <a class="btn" href="/2019/09/01/Human Resource Machine - 一款杂糅了编程元素的另类解谜游戏/" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -1069,7 +1096,7 @@
           <!--noindex-->
           
             <div class="post-button text-center">
-              <a class="btn" href="/2019/09/01/Sevice-Computing-Windows环境下使用VirtualBox搭建云桌面/#more" rel="contents">
+              <a class="btn" href="/2019/09/01/Sevice-Computing-Windows环境下使用VirtualBox搭建云桌面/" rel="contents">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -1307,8 +1334,7 @@
   <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
   <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
 <script src="/js/utils.js?v=7.3.0"></script><script src="/js/motion.js?v=7.3.0"></script>
-<script src="/js/schemes/pisces.js?v=7.3.0"></script>
-
+<script src="/js/schemes/muse.js?v=7.3.0"></script>
 <script src="/js/next-boot.js?v=7.3.0"></script>
 
 
@@ -1322,6 +1348,7 @@
 
 
 
+  <script src="/js/local-search.js?v=7.3.0"></script>
 
 
 
@@ -1335,6 +1362,27 @@
 
 
 
+
+  
+
+  
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
   
 
   

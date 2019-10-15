@@ -1856,7 +1856,7 @@ article:last-child .post-eof {
 }
 .links-of-author a::before,
 .links-of-author span.exturl::before {
-  background: #3328ff;
+  background: #adddff;
   border-radius: 50%;
   content: ' ';
   display: inline-block;
@@ -2606,12 +2606,12 @@ embed {
   }
 }
 .sidebar {
-  left: -320px;
+  left: -280px;
 }
 .sidebar.sidebar-active {
   left: 0;
 }
 .sidebar {
   transition: all 0.4s;
-  width: 320px;
+  width: 280px;
 }

@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+
+
+
+
+
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.3.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.3.0">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.3.0">
+  <link rel="mask-icon" href="/images/logo.svg?v=7.3.0" color="#222">
+
+<link rel="stylesheet" href="/css/main.css?v=7.3.0">
+
+<link rel="stylesheet" href="https://fonts.loli.net/css?family=Noto Serif SC:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.7.0">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '7.3.0',
+    exturl: false,
+    sidebar: {"position":"left","width":280,"display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":true,"show_result":true,"style":"mac"},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":true},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: '',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    translation: {
+      copy_button: '复制',
+      copy_success: '复制成功',
+      copy_failure: '复制失败'
+    },
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="3D游戏编程课程的第六次作业：  改进上一次的飞碟（Hit UFO）游戏 按 adapter模式 设计图修改飞碟游戏 使它同时支持物理运动与运动学（变换）运动    课程主页    飞碟游戏改进项目地址 演示视频 设计图分析根据题目要求，我们先来看看老师在课件中给出的adapter模式设计图：   分析上述UML图，可以发现：我们要实现的目标就是增加一个PhysisActionManager，并">
+<meta name="keywords" content="课程作业,Unity">
+<meta property="og:type" content="article">
+<meta property="og:title" content="3D-Game-Programming-Design - 物理系统与碰撞">
+<meta property="og:url" content="http://yoursite.com/2019/10/17/3D-Game-Programming-Design-物理系统与碰撞/index.html">
+<meta property="og:site_name" content="Daniel&#39;s Blog">
+<meta property="og:description" content="3D游戏编程课程的第六次作业：  改进上一次的飞碟（Hit UFO）游戏 按 adapter模式 设计图修改飞碟游戏 使它同时支持物理运动与运动学（变换）运动    课程主页    飞碟游戏改进项目地址 演示视频 设计图分析根据题目要求，我们先来看看老师在课件中给出的adapter模式设计图：   分析上述UML图，可以发现：我们要实现的目标就是增加一个PhysisActionManager，并">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/2019/10/17/3D-Game-Programming-Design-物理系统与碰撞/UML.png">
+<meta property="og:image" content="http://yoursite.com/2019/10/17/3D-Game-Programming-Design-物理系统与碰撞/controller.png">
+<meta property="og:image" content="http://yoursite.com/2019/10/17/3D-Game-Programming-Design-物理系统与碰撞/game.png">
+<meta property="og:updated_time" content="2019-10-17T06:52:01.201Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="3D-Game-Programming-Design - 物理系统与碰撞">
+<meta name="twitter:description" content="3D游戏编程课程的第六次作业：  改进上一次的飞碟（Hit UFO）游戏 按 adapter模式 设计图修改飞碟游戏 使它同时支持物理运动与运动学（变换）运动    课程主页    飞碟游戏改进项目地址 演示视频 设计图分析根据题目要求，我们先来看看老师在课件中给出的adapter模式设计图：   分析上述UML图，可以发现：我们要实现的目标就是增加一个PhysisActionManager，并">
+<meta name="twitter:image" content="http://yoursite.com/2019/10/17/3D-Game-Programming-Design-物理系统与碰撞/UML.png">
+  <link rel="canonical" href="http://yoursite.com/2019/10/17/3D-Game-Programming-Design-物理系统与碰撞/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>3D-Game-Programming-Design - 物理系统与碰撞 | Daniel's Blog</title>
+  <meta name="generator" content="Hexo 3.9.0">
+  
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-CN">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Daniel's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">A student of Software Engineering from Sun Yat-sen University</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+      
+      
+      
+        
+        <li class="menu-item menu-item-home">
+      
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-about">
+      
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-tags">
+      
+    
+
+    <a href="/tags/" rel="section"><i class="menu-item-icon fa fa-fw fa-tags"></i> <br>标签</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-categories">
+      
+    
+
+    <a href="/categories/" rel="section"><i class="menu-item-icon fa fa-fw fa-th"></i> <br>分类</a>
+
+  </li>
+      
+      
+      
+        
+        <li class="menu-item menu-item-archives">
+      
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a href="javascript:;" class="popup-trigger">
+        
+          <i class="menu-item-icon fa fa-search fa-fw"></i> <br>搜索</a>
+      </li>
+    
+  </ul>
+
+    
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/DanielXuuuuu" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+      <article itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block post">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/10/17/3D-Game-Programming-Design-物理系统与碰撞/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Daniel Xu">
+      <meta itemprop="description" content="Think twice, code once.">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Daniel's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">3D-Game-Programming-Design - 物理系统与碰撞
+
+          
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              
+                
+              
+
+              <time title="创建时间：2019-10-17 09:26:06 / 修改时间：14:52:01" itemprop="dateCreated datePublished" datetime="2019-10-17T09:26:06+08:00">2019-10-17</time>
+            </span>
+          
+            
+
+            
+          
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing"><a href="/categories/3D游戏编程/" itemprop="url" rel="index"><span itemprop="name">3D游戏编程</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            <span class="post-meta-item" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="busuanzi-value" id="busuanzi_value_page_pv"></span>
+            </span>
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>3D游戏编程课程的第六次作业：</p>
+<ul>
+<li>改进上一次的<a href="https://danielxuuuuu.github.io/2019/10/06/3D-Game-Programming-Design-%E4%B8%8E%E6%B8%B8%E6%88%8F%E4%B8%96%E7%95%8C%E4%BA%A4%E4%BA%92/" target="_blank" rel="noopener">飞碟（Hit UFO）游戏</a><ul>
+<li>按 <em>adapter模式</em> 设计图修改飞碟游戏</li>
+<li>使它同时支持物理运动与运动学（变换）运动</li>
+</ul>
+</li>
+</ul>
+<p><a href="https://pmlpml.github.io/unity3d-learning/06-physics-and-collision" target="_blank" rel="noopener">课程主页</a></p>
+</blockquote>
+<!--read more-->
+
+<h3 id="飞碟游戏改进"><a href="#飞碟游戏改进" class="headerlink" title="飞碟游戏改进"></a>飞碟游戏改进</h3><p><a href="https://github.com/DanielXuuuuu/Unity3D-Learning/tree/master/Hit_UFO_Pro" target="_blank" rel="noopener">项目地址</a></p>
+<p><a href="https://www.bilibili.com/video/av71508540/" target="_blank" rel="noopener">演示视频</a></p>
+<h4 id="设计图分析"><a href="#设计图分析" class="headerlink" title="设计图分析"></a>设计图分析</h4><p>根据题目要求，我们先来看看老师在课件中给出的adapter模式设计图：</p>
+<img src="/2019/10/17/3D-Game-Programming-Design-物理系统与碰撞/UML.png">
+
+<p>分析上述UML图，可以发现：我们要实现的目标就是增加一个<code>PhysisActionManager</code>，并设计一个统一的抽象接口，使得新的动作管理器和之前的<code>CCActionManager</code>都实现它。这样一来，我们就可以选择其中的一个了。</p>
+<h4 id="适配器模式简介"><a href="#适配器模式简介" class="headerlink" title="适配器模式简介"></a>适配器模式简介</h4><ul>
+<li><p><strong>意图：</strong>将一个类的接口转换成客户希望的另外一个接口。适配器模式使得原本由于接口不兼容而不能一起工作的那些类可以一起工作。</p>
+</li>
+<li><p><strong>主要解决：</strong>主要解决在软件系统中，常常要将一些”现存的对象”放到新的环境中，而新环境要求的接口是现对象不能满足的。</p>
+</li>
+<li><p><strong>何时使用：</strong> 1、系统需要使用现有的类，而此类的接口不符合系统的需要。 2、想要建立一个可以重复使用的类，用于与一些彼此之间没有太大关联的一些类，包括一些可能在将来引进的类一起工作，这些源类不一定有一致的接口。 3、通过接口转换，将一个类插入另一个类系中。（比如老虎和飞禽，现在多了一个飞虎，在不增加实体的需求下，增加一个适配器，在里面包容一个虎对象，实现飞的接口。）</p>
+</li>
+<li><p><strong>如何解决：</strong>继承或依赖（推荐）。</p>
+</li>
+<li><p><strong>关键代码：</strong>适配器继承或依赖已有的对象，实现想要的目标接口。</p>
+</li>
+</ul>
+<p>适配器模式通常由两种实现方式：<strong>类适配器模式</strong>和<strong>对象适配器模式</strong>，区别就在于前者通过继承实现，后者通过委托（delegate）实现。具体在这里就不展开赘述了，具体可以见这个<a href="https://blog.csdn.net/qq_36982160/article/details/79965027" target="_blank" rel="noopener">网站</a>，就老师给出的UML图而言，我们使用的是<strong>类适配器</strong>，即通过继承方式实现，但似乎老师的UML图给出的不太符合真正的适配器模式，只是抽象出了一个接口而已，不过按照老师的设计图做就可以了。</p>
+<h4 id="实现流程"><a href="#实现流程" class="headerlink" title="实现流程"></a>实现流程</h4><h5 id="新增接口IActionManager"><a href="#新增接口IActionManager" class="headerlink" title="新增接口IActionManager"></a>新增接口<code>IActionManager</code></h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">public interface IActionManager</span><br><span class="line">&#123;</span><br><span class="line">    void playDisk(GameObject disk, float angle, float power, bool isPhysis);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>该接口是场景控制器和动作管理器的桥梁，负责与场景控制器进行交流，从而隐藏了具体动作管理器的实现细节。</p>
+<h5 id="适配器ActionManagerAdapter"><a href="#适配器ActionManagerAdapter" class="headerlink" title="适配器ActionManagerAdapter"></a>适配器<code>ActionManagerAdapter</code></h5><p><code>ActionManagerAdapter</code>类实现上述接口，实现对于不同运动管理器的管理和调用。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">public class ActionManagerAdapter : MonoBehaviour, IActionManager</span><br><span class="line">&#123;</span><br><span class="line">    public CCActionManager CCAction;</span><br><span class="line">    public PhysisActionManager PhysisAction;</span><br><span class="line"></span><br><span class="line">    public void playDisk(GameObject disk, float angle, float power, bool isPhysis)</span><br><span class="line">    &#123;</span><br><span class="line">        if (!isPhysis)</span><br><span class="line">        &#123;</span><br><span class="line">            CCAction.playDisk(disk, angle, power);</span><br><span class="line">        &#125;</span><br><span class="line">        else</span><br><span class="line">        &#123;</span><br><span class="line">            PhysisAction.playDisk(disk, angle, power);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    void Start()</span><br><span class="line">    &#123;</span><br><span class="line">        CCAction = gameObject.AddComponent&lt;CCActionManager&gt;() as CCActionManager;</span><br><span class="line">        PhysisAction = gameObject.AddComponent&lt;PhysisActionManager&gt;() as PhysisActionManager;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="PhysisAction和PhysisActionManager"><a href="#PhysisAction和PhysisActionManager" class="headerlink" title="PhysisAction和PhysisActionManager"></a><code>PhysisAction</code>和<code>PhysisActionManager</code></h5><p>物理运动的具体实现。实现方法可以参考之前的运动学管理器<code>CCActionManager</code>。不同的地方在于，物理运动是通过对物体添加重力和一个初速度后（使用<code>Rigidbody</code>刚体组件实现），物体就会自动按照物理学规律运动，无需进行额外的管理。</p>
+<p>需要注意的是，这里我们在使用物理运动管理器时，设置<code>gameObject.GetComponent&lt;Rigidbody&gt;().useGravity = true;</code>，并添加了初速度。那么，如果需要做到随意切换，那么在运动学管理器中，我们需要做相反的操作，即取消重力和<code>Rigidbody</code>组件的初速度。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line">public class PhysisFlyAction : SSAction</span><br><span class="line">&#123;</span><br><span class="line">    private Vector3 startVector;</span><br><span class="line">    public float power;</span><br><span class="line"></span><br><span class="line">    public static PhysisFlyAction GetSSAction(Vector3 direction, float angle, float power)</span><br><span class="line">    &#123;</span><br><span class="line">        PhysisFlyAction action = CreateInstance&lt;PhysisFlyAction&gt;();</span><br><span class="line">        if (direction.x == -1)</span><br><span class="line">        &#123;</span><br><span class="line">            action.startVector = Quaternion.Euler(new Vector3(0, 1, -angle)) * Vector3.left * power;</span><br><span class="line">        &#125;</span><br><span class="line">        else</span><br><span class="line">        &#123;</span><br><span class="line">            action.startVector = Quaternion.Euler(new Vector3(0, 1, angle)) * Vector3.right * power;</span><br><span class="line">        &#125;</span><br><span class="line">        action.power = power;</span><br><span class="line">        return action;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public override void Start()</span><br><span class="line">    &#123;</span><br><span class="line">        gameObject.GetComponent&lt;Rigidbody&gt;().velocity = power / 15 * startVector;</span><br><span class="line">        gameObject.GetComponent&lt;Rigidbody&gt;().useGravity = true;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    public override void Update()</span><br><span class="line">    &#123;</span><br><span class="line">        if (this.transform.position.y &lt; -10)</span><br><span class="line">        &#123;</span><br><span class="line">            this.destory = true;</span><br><span class="line">            this.callback.SSActionEvent(this);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">public class PhysisActionManager : SSActionManager, ISSActionCallback</span><br><span class="line">&#123;</span><br><span class="line">    public PhysisFlyAction fly;</span><br><span class="line"></span><br><span class="line">    protected new void Start()&#123; &#125;</span><br><span class="line"></span><br><span class="line">    //飞碟飞行</span><br><span class="line">    public void playDisk(GameObject disk, float angle, float power)</span><br><span class="line">    &#123;</span><br><span class="line">        fly = PhysisFlyAction.GetSSAction(disk.GetComponent&lt;DiskData&gt;().direction, angle, power);</span><br><span class="line">        this.RunAction(disk, fly, this);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    #region ISSActionCallback implementation</span><br><span class="line">    public void SSActionEvent(SSAction source,</span><br><span class="line">        SSActionEventType events = SSActionEventType.Compeleted,</span><br><span class="line">        int intParam = 0,</span><br><span class="line">        string strParam = null,</span><br><span class="line">        Object objectParam = null)</span><br><span class="line">    &#123;</span><br><span class="line">        //回调函数,动作执行完后调用</span><br><span class="line">    &#125;</span><br><span class="line">    #endregion</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="修改场景控制器"><a href="#修改场景控制器" class="headerlink" title="修改场景控制器"></a>修改场景控制器</h5><p>对于场景控制器，做以下一些修改：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">//添加一个公共的BOOL属性，用于在游戏进行过程中随时切换运动管理器</span><br><span class="line">public bool isPhysis = false;</span><br><span class="line"></span><br><span class="line">//将场景的运动管理器由原先的 CCActionManager 改为 IActionManager</span><br><span class="line">actionManager = gameObject.AddComponent&lt;ActionManagerAdapter&gt;() as IActionManager;</span><br><span class="line"></span><br><span class="line">//为原先的函数调用增加一个参数</span><br><span class="line">actionManager.playDisk(disk, angle, power, isPhysis);</span><br></pre></td></tr></table></figure>
+
+<h5 id="修改飞碟Prefab"><a href="#修改飞碟Prefab" class="headerlink" title="修改飞碟Prefab"></a>修改飞碟Prefab</h5><p>在完成了上述代码后，由于物理运动的实现通过<code>Rigidbody</code>刚体组件，我们需要给飞碟预制添加<code>Rigidbody</code>组件，并不勾选<code>Use Gravity</code>，交给我们的代码控制。</p>
+<p>完成上述改动后，就基本上实现了使用 Adapter 模式实现两种运动的要求。</p>
+<h4 id="实现结果"><a href="#实现结果" class="headerlink" title="实现结果"></a>实现结果</h4><p>启动游戏后，我们可以通过右边面板中场景管理器的<code>isPhysis</code>属性在游戏中随时切换不同的运动管理器。</p>
+<img src="/2019/10/17/3D-Game-Programming-Design-物理系统与碰撞/controller.png">
+
+<p>游戏界面如下：</p>
+<img src="/2019/10/17/3D-Game-Programming-Design-物理系统与碰撞/game.png">
+
+
+    </div>
+
+    
+    
+    
+        
+      
+        <div id="reward-container">
+  <div></div>
+  <button id="reward-button" disable="enable" onclick="var qr = document.getElementById(&quot;qr&quot;); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+        
+      
+      <div style="display: inline-block">
+        <img src="/images/wechatpay.jpg" alt="Daniel Xu 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+      
+
+      <footer class="post-footer">
+          
+            
+          
+          <div class="post-tags">
+            
+              <a href="/tags/课程作业/" rel="tag"><i class="fa fa-tag"></i> 课程作业</a>
+            
+              <a href="/tags/Unity/" rel="tag"><i class="fa fa-tag"></i> Unity</a>
+            
+          </div>
+          <div class="post-copyright">    
+            
+            <ul style="margin: 0.5em 0 0;
+                                            padding: 0.5em 1em;
+                                            border-left: 3px solid #ff1700;
+                                            background-color: #f8f8f8;
+                                            list-style: none;">
+              <li class="post-copyright-author">
+                  <strong>本文作者： </strong>Daniel Xu
+              </li>
+              <li class="post-copyright-link">
+                <strong>本文链接：</strong>
+                <a href="/2019/10/17/3D-Game-Programming-Design-物理系统与碰撞/" title="3D-Game-Programming-Design - 物理系统与碰撞">2019/10/17/3D-Game-Programming-Design-物理系统与碰撞/</a>
+              </li>
+              <li class="post-copyright-license">
+                <strong>版权声明：</strong>
+                本博客所有文章除特别声明外，均采用 <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/cn/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0 CN</a> 许可协议。转载请注明出处！
+              </li>
+            </ul>
+            
+          </div>
+        
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+              
+                <a href="/2019/10/15/浅谈PoW（Proof-of-Work）共识机制/" rel="next" title="浅谈PoW（Proof of Work）共识机制">
+                  <i class="fa fa-chevron-left"></i> 浅谈PoW（Proof of Work）共识机制
+                </a>
+              
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+              
+            </div>
+          </div>
+        
+      </footer>
+    
+  </div>
+  
+  
+  
+  </article>
+
+  </div>
+
+
+          </div>
+          
+    
+    <div class="comments" id="gitalk-container"></div>
+  
+
+        </div>
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+        
+        
+        
+        
+      
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#飞碟游戏改进"><span class="nav-number">1.</span> <span class="nav-text">飞碟游戏改进</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#设计图分析"><span class="nav-number">1.1.</span> <span class="nav-text">设计图分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#适配器模式简介"><span class="nav-number">1.2.</span> <span class="nav-text">适配器模式简介</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#实现流程"><span class="nav-number">1.3.</span> <span class="nav-text">实现流程</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#新增接口IActionManager"><span class="nav-number">1.3.1.</span> <span class="nav-text">新增接口IActionManager</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#适配器ActionManagerAdapter"><span class="nav-number">1.3.2.</span> <span class="nav-text">适配器ActionManagerAdapter</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#PhysisAction和PhysisActionManager"><span class="nav-number">1.3.3.</span> <span class="nav-text">PhysisAction和PhysisActionManager</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#修改场景控制器"><span class="nav-number">1.3.4.</span> <span class="nav-text">修改场景控制器</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#修改飞碟Prefab"><span class="nav-number">1.3.5.</span> <span class="nav-text">修改飞碟Prefab</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#实现结果"><span class="nav-number">1.4.</span> <span class="nav-text">实现结果</span></a></li></ol></li></ol></div>
+        
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image"
+      src="/images/avatar.jpg"
+      alt="Daniel Xu">
+  <p class="site-author-name" itemprop="name">Daniel Xu</p>
+  <div class="site-description" itemprop="description">Think twice, code once.</div>
+</div>
+  <nav class="site-state motion-element">
+      <div class="site-state-item site-state-posts">
+        
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-categories">
+        
+          
+            <a href="/categories/">
+          
+        
+        
+        
+          
+        
+          
+        
+          
+        
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span>
+        </a>
+      </div>
+    
+      
+      
+      <div class="site-state-item site-state-tags">
+        
+          
+            <a href="/tags/">
+          
+        
+        
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-name">标签</span>
+        </a>
+      </div>
+    
+  </nav>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+      
+      
+        
+      
+      
+        
+      
+        <a href="https://github.com/DanielXuuuuu" title="GitHub &rarr; https://github.com/DanielXuuuuu" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+      </span>
+    
+      <span class="links-of-author-item">
+      
+      
+        
+      
+      
+        
+      
+        <a href="https://blog.csdn.net/White3zz" title="CSDN &rarr; https://blog.csdn.net/White3zz" rel="noopener" target="_blank"><i class="fa fa-fw fa-crosshairs"></i>CSDN</a>
+      </span>
+    
+      <span class="links-of-author-item">
+      
+      
+        
+      
+      
+        
+      
+        <a href="mailto:979223119@qq.com" title="E-Mail &rarr; mailto:979223119@qq.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+      </span>
+    
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Daniel Xu</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-user"></i>
+    </span>
+    <span class="site-uv" title="总访客量">
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+    </span>
+  
+    <span class="post-meta-divider">|</span>
+  
+    <span class="post-meta-item-icon">
+      <i class="fa fa-eye"></i>
+    </span>
+    <span class="site-pv" title="总访问量">
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+    </span>
+  
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+
+
+    
+  
+  <script color='0,0,255' opacity='0.5' zIndex='-1' count='99' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js?v=3.1.0"></script>
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+<script src="/js/utils.js?v=7.3.0"></script><script src="/js/motion.js?v=7.3.0"></script>
+<script src="/js/schemes/muse.js?v=7.3.0"></script>
+<script src="/js/next-boot.js?v=7.3.0"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+  <script src="/js/local-search.js?v=7.3.0"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID: 'e8a2555d351479c4f410',
+      clientSecret: '09087135840054a93d97b280f718a2b59ae0e277',
+      repo: 'DanielXuuuuu.github.io',
+      owner: 'DanielXuuuuu',
+      admin: ['DanielXuuuuu'],
+      id: '164f9ea6bdd83f0e8a42ffdcefa680bf',
+        language: window.navigator.language || window.navigator.userLanguage,
+      
+      distractionFreeMode: 'true'
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+</script>
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"right","width":150,"height":300,"hOffset":80,"vOffset":-50},"mobile":{"show":false},"log":false,"tagMode":false});</script></body>
+</html>

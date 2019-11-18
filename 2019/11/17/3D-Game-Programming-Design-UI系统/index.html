@@ -65,7 +65,7 @@
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://yoursite.com/2019/11/17/3D-Game-Programming-Design-UI系统/IMGUI.png">
 <meta property="og:image" content="http://yoursite.com/2019/11/17/3D-Game-Programming-Design-UI系统/UGUI.png">
-<meta property="og:updated_time" content="2019-11-17T12:09:20.608Z">
+<meta property="og:updated_time" content="2019-11-18T03:29:39.387Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="3D-Game-Programming-Design-UI系统">
 <meta name="twitter:description" content="3D游戏编程的第九次作业：  血条（Health Bar）的预制设计  课程主页">
@@ -292,11 +292,19 @@
                 
               
 
-              <time title="创建时间：2019-11-17 15:07:11 / 修改时间：20:09:20" itemprop="dateCreated datePublished" datetime="2019-11-17T15:07:11+08:00">2019-11-17</time>
+              <time title="创建时间：2019-11-17 15:07:11" itemprop="dateCreated datePublished" datetime="2019-11-17T15:07:11+08:00">2019-11-17</time>
             </span>
           
             
 
+            
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2019-11-18 11:29:39" itemprop="dateModified" datetime="2019-11-18T11:29:39+08:00">2019-11-18</time>
+              </span>
             
           
             <span class="post-meta-item">
@@ -347,6 +355,8 @@
 <li>分析两种实现的优缺点</li>
 <li>给出预制的使用方法</li>
 </ul>
+<p><a href="https://github.com/DanielXuuuuu/Unity3D-Learning/tree/master/UI_System" target="_blank" rel="noopener">项目地址</a></p>
+<p><a href="https://www.bilibili.com/video/av76047817/" target="_blank" rel="noopener">演示视频</a></p>
 <h3 id="实现过程"><a href="#实现过程" class="headerlink" title="实现过程"></a>实现过程</h3><h4 id="IMGUI"><a href="#IMGUI" class="headerlink" title="IMGUI"></a>IMGUI</h4><p>IMGUI主要通过<code>HorizontalScrollbar</code>实现，将其宽度作为血条的显示值。</p>
 <p>具体代码如下，主要就是创建了一个矩形的<code>HorizontalScrollbar</code>作为血条，以及两个按钮，使得我们对于血量可以进行直观的增减，按钮触发的事件直接改变血量。</p>
 <p>其中，参考以前师兄们的博客，使用了线性插值函数<code>Lerp()</code>，该函数有很多用法，这里的<code>Mathf.Lerp(from : float, to : float, t : float)</code> 函数基于浮点数<code>t</code>返回<code>a</code>到<code>b</code>之间的插值，<code>t</code>限制在0～1之间。当<code>t</code> = 0返回from，当<code>t</code> = 1 返回to。当<code>t</code> = 0.5 返回from和to的平均值。 因此，通过这个函数可以实现血量的平滑改变。</p>

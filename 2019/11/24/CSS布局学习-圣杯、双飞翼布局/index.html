@@ -69,8 +69,8 @@
 <meta property="og:image" content="http://yoursite.com/2019/11/24/CSS布局学习-圣杯、双飞翼布局/4.png">
 <meta property="og:image" content="http://yoursite.com/2019/11/24/CSS布局学习-圣杯、双飞翼布局/5.png">
 <meta property="og:image" content="http://yoursite.com/2019/11/24/CSS布局学习-圣杯、双飞翼布局/6.png">
-<meta property="og:image" content="http://yoursite.com/2019/11/24/CSS布局学习-圣杯、双飞翼布局/6.png">
-<meta property="og:updated_time" content="2019-11-24T05:27:46.137Z">
+<meta property="og:image" content="http://yoursite.com/2019/11/24/CSS布局学习-圣杯、双飞翼布局/7.png">
+<meta property="og:updated_time" content="2019-11-24T05:30:24.455Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="CSS布局学习 | 圣杯、双飞翼布局">
 <meta name="twitter:description" content="CSS学习笔记 本篇笔记主要记录了经典的圣杯、双飞翼布局的实现方式">
@@ -297,7 +297,7 @@
                 
               
 
-              <time title="创建时间：2019-11-24 10:28:46 / 修改时间：13:27:46" itemprop="dateCreated datePublished" datetime="2019-11-24T10:28:46+08:00">2019-11-24</time>
+              <time title="创建时间：2019-11-24 10:28:46 / 修改时间：13:30:24" itemprop="dateCreated datePublished" datetime="2019-11-24T10:28:46+08:00">2019-11-24</time>
             </span>
           
             
@@ -400,9 +400,9 @@
 <li>由于没有了相对定位，页面的最小宽度也有没有了上文所述的限制。</li>
 </ul>
 <p>我们注意到在圣杯布局中，对于<code>right</code>元素，最后使用了<code>margin-right: -150px;</code>，而在双飞翼中则是<code>margin-left: -150px;</code>来实现。个人的观点是，由于在圣杯布局中，我们的方式是通过<code>padding</code>内边距预留空间，如果我们此时使用<code>margin-left</code>就会导致如下结果：</p>
-<img src="/2019/11/24/CSS布局学习-圣杯、双飞翼布局/6.png">
+<img src="/2019/11/24/CSS布局学习-圣杯、双飞翼布局/7.png">
 
-<p>原因就是margin是根据其在“元素流”（文档流或者浮动流）中的前一个元素来定位的，在圣杯布局中<code>right</code>的前一个浮动元素<code>center</code>，是在<code>container</code>的内容区里面，所以设置了负外边距后，不会按照预期的来到预留的位置，而是相对于<code>center</code>进入了内容区中。而在双飞翼中，它的前一个浮动元素是就是<code>container</code>，而<code>container</code>的宽度充满了整个屏幕，因此会得到正确结果。</p>
+<p>原因就是元素会紧挨着其在“元素流”（文档流或者浮动流）中的前一个元素，在圣杯布局中<code>right</code>的前一个浮动元素<code>center</code>，是在<code>container</code>的内容区里面，所以设置了负外边距后，不会按照预期的来到预留的位置，而是相对于<code>center</code>进入了内容区中。而在双飞翼中，它的前一个浮动元素是就是<code>container</code>，而<code>container</code>的宽度充满了整个屏幕，因此会得到正确结果。</p>
 <p><strong>PS：其实在圣杯布局中，对于右栏使用<code>margin-left</code>也是可以的，然后再用一下相对定位的，和左栏一样（实际上大多数网上的圣杯实现左右栏都是使用了相对定位）</strong>。至于为何使用<code>margin-right</code>会直接有这样的效果，目前我也还不是很清楚，<u>还望看到本博客的人不吝赐教</u>。</p>
 <h3 id="进阶：Flex布局"><a href="#进阶：Flex布局" class="headerlink" title="进阶：Flex布局"></a>进阶：Flex布局</h3><p>在CSS3引入Flex（弹性盒子）布局后，要实现这种分栏布局就变得更加简单了：</p>
 <h4 id="DOM结构-2"><a href="#DOM结构-2" class="headerlink" title="DOM结构"></a>DOM结构</h4><figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">"header"</span>&gt;</span>This is header<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">"container"</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">"center"</span>&gt;</span>center<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">"left"</span>&gt;</span>left<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    	<span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">"right"</span>&gt;</span>right<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">div</span> <span class="attr">id</span>=<span class="string">"footer"</span>&gt;</span>This is footer<span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br></pre></td></tr></table></figure>

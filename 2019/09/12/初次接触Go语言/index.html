@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <!-- title -->
+
+
+
+
+<!-- keywords -->
+
+
+
+
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="Daniel Xu">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Daniel Xu">
+    
+    <meta name="keywords" content="front-end,study,blog">
+    
+    <meta name="description" content="Think twice, code once.">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>初次接触Go语言 · Daniel&#39;s Studio</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href="/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="stylesheet" href="/css/mobile.css?v=20180824" media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href="/assets/favicon.ico">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+    <!-- fancybox -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+</head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >Daniel&#39;s Studio.</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">初次接触Go语言</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href=/>Daniel's Studio.</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style="
+
+
+
+
+
+
+
+height:50vh;
+">
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            初次接触Go语言
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class= post-intro-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "Go语言">Go语言</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">1.1k</span>阅读时长: <span class="post-count reading-time">4 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2019/09/12</span>
+                    
+                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                        <span class="iconfont-archer">&#xe602;</span>
+                        <span id="busuanzi_value_page_pv"></span>
+                    </span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <p>在配置完Go语言编程环境后，我阅读了官方文档 <a href="https://go-zh.org/doc/code.html" target="_blank" rel="noopener">如何使用Go编程</a> ，并按文档写第一个包，做第一次测试。</p>
+<p>项目地址：<a href="https://github.com/DanielXuuuuu/ServiceComputingOnCloud" target="_blank" rel="noopener">https://github.com/DanielXuuuuu/ServiceComputingOnCloud</a></p>
+<a id="more"></a>
+
+<h3 id="准备工作"><a href="#准备工作" class="headerlink" title="准备工作"></a>准备工作</h3><p>首先，需要了解一些基础知识：</p>
+<h6 id="编程环境"><a href="#编程环境" class="headerlink" title="编程环境"></a>编程环境</h6><ul>
+<li><p><strong>工作空间</strong>：Go代码必须放在工作空间内。它其实就是一个目录，其中包含三个子目录：</p>
+<ul>
+<li><code>src</code> 目录包含Go的源文件，它们被组织成包（每个目录都对应一个包）;</li>
+<li><code>pkg</code> 目录包含编译后生成的包/库文件；</li>
+<li><code>bin</code> 目录包含编译后生成的可执行文件。</li>
+</ul>
+</li>
+<li><p><strong>环境变量</strong>：<code>GOPATH</code> 环境变量指定了你的工作空间位置（工作空间目录），需要添加到系统的PATH中。<code>GOPATH</code> 适合处理大量 Go语言源码、多个包组合而成的复杂工程。</p>
+</li>
+</ul>
+<h6 id="GO相关"><a href="#GO相关" class="headerlink" title="GO相关"></a>GO相关</h6><ul>
+<li><p>包 Package</p>
+<ul>
+<li>Go语言是使用包来组织源代码的，并实现命名空间的管理。任何源代码文件必须属于某个包。源码文件的第一行有效代码必须是 package pacakgeName 语句，通过该语句声明自己所在的包。Go 语言的入口 main() 函数所在的包（package）叫 main，main 包想要引用别的代码，必须同样以包的方式进行引用。</li>
+<li>包一般放到公司的域名目录下，这样能保证包名的唯一性，便于共享代码。比如个人的 GitHub 项目的包一般放到 $GOPATH/src/github.com/userName/projectName 目录下。</li>
+<li>包的定义是不包括目录路径的，但是包的引用一般是全路径引用</li>
+</ul>
+</li>
+<li><p><a href="https://go-zh.org/cmd/go/" target="_blank" rel="noopener">go工具</a>：在命令行下，go提供了很多自带的命令行工具：</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">Go is a<span class="built_in"> tool </span><span class="keyword">for</span> managing Go source code.</span><br><span class="line"></span><br><span class="line">Usage:</span><br><span class="line"></span><br><span class="line">    go &lt;command&gt; [arguments]</span><br><span class="line"></span><br><span class="line">The commands are:</span><br><span class="line"></span><br><span class="line">    bug         start a bug report</span><br><span class="line">    build       compile packages <span class="keyword">and</span> dependencies</span><br><span class="line">    clean       <span class="builtin-name">remove</span> object files <span class="keyword">and</span> cached files</span><br><span class="line">    doc         show documentation <span class="keyword">for</span> package <span class="keyword">or</span> symbol</span><br><span class="line">    env         <span class="builtin-name">print</span> Go environment information</span><br><span class="line">    fix         update packages <span class="keyword">to</span> use new APIs</span><br><span class="line">    fmt         gofmt (reformat) package sources</span><br><span class="line">    generate    generate Go files by processing source</span><br><span class="line">    <span class="builtin-name">get</span>         download <span class="keyword">and</span> install packages <span class="keyword">and</span> dependencies</span><br><span class="line">    install     compile <span class="keyword">and</span> install packages <span class="keyword">and</span> dependencies</span><br><span class="line">    list        list packages <span class="keyword">or</span> modules</span><br><span class="line">    mod         module maintenance</span><br><span class="line">    <span class="builtin-name">run</span>         compile <span class="keyword">and</span> <span class="builtin-name">run</span> Go program</span><br><span class="line">    test        test packages</span><br><span class="line">   <span class="built_in"> tool </span>       <span class="builtin-name">run</span> specified go tool</span><br><span class="line">    version     <span class="builtin-name">print</span> Go version</span><br><span class="line">    vet         report likely mistakes <span class="keyword">in</span> packages</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h3 id="我的第一个程序"><a href="#我的第一个程序" class="headerlink" title="我的第一个程序"></a>我的第一个程序</h3><p>以下是已设置好的环境变量：</p>
+<img src="/2019/09/12/初次接触Go语言/gopath.png">
+
+<p>首先在src目录下创建一个文件夹，并在其中新建一个文件</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mkdir $GOPATH/src/github.com/DanielXuuuuu/hello</span><br><span class="line">cd $GOPATH/src/github.com/DanielXuuuuu/hello</span><br><span class="line">touch hello.go</span><br></pre></td></tr></table></figure>
+
+<p>通过vim或者VSCode输入以下代码</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">"fmt"</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	fmt.Printf(<span class="string">"Hello, world.\n"</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>保存后，在终端执行<code>go install github.com/DanielXuuuuu/hello</code>，go工具会根据GOPATH指定的工作空间，到src子文件夹查找源码。此命令会构建 <code>hello</code> 命令，产生一个可执行的二进制文件。 接着它会将该二进制文件作为 <code>hello</code>（在 Windows 下则为 <code>hello.exe</code>）安装到工作空间的 <code>bin</code> 目录中。</p>
+<p>由于已经将 <code>$GOPATH/bin</code> 添加到 <code>PATH</code> 中了，只需输入该二进制文件名即可运行。</p>
+<img src="/2019/09/12/初次接触Go语言/hello1.png">
+
+<h3 id="我的第一个包"><a href="#我的第一个包" class="headerlink" title="我的第一个包"></a>我的第一个包</h3><p>首先创建包目录：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ mkdir $GOPATH/src/github.com/DanielXuuuuu/stringutil</span><br></pre></td></tr></table></figure>
+
+<p>接着，在该目录中创建名为 <code>reverse.go</code> 的文件：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// stringutil 包含有用于处理字符串的工具函数。</span></span><br><span class="line"><span class="keyword">package</span> stringutil</span><br><span class="line"></span><br><span class="line"><span class="comment">// Reverse 将其实参字符串以符文为单位左右反转。</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">Reverse</span><span class="params">(s <span class="keyword">string</span>)</span> <span class="title">string</span></span> &#123;</span><br><span class="line">	r := []<span class="keyword">rune</span>(s)</span><br><span class="line">	<span class="keyword">for</span> i, j := <span class="number">0</span>, <span class="built_in">len</span>(r)<span class="number">-1</span>; i &lt; <span class="built_in">len</span>(r)/<span class="number">2</span>; i, j = i+<span class="number">1</span>, j<span class="number">-1</span> &#123;</span><br><span class="line">		r[i], r[j] = r[j], r[i]</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="keyword">string</span>(r)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>执行<code>go build github.com/DanielXuuuuu/stringutil</code>进行编译。编译完后，<code>stringutil</code> 包就构建完毕了，我们修改原来的 <code>hello.go</code> 文件：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line"></span><br><span class="line">	<span class="string">"stringutil"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	fmt.Printf(stringutil.Reverse(<span class="string">"!oG ,olleH"</span>))</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>保存后再次执行<code>go install ...</code>，并运行，结果为：</p>
+<img src="/2019/09/12/初次接触Go语言/hello2.png">
+
+<h3 id="编写测试"><a href="#编写测试" class="headerlink" title="编写测试"></a>编写测试</h3><p>Go拥有一个轻量级的测试框架，它由 <code>go test</code> 命令和 <code>testing</code> 包构成。通过创建一个名字为<code>XXX_test.go</code> 用于测试<code>XXX.go</code>。因此，我们在<code>stringutil</code>目录下创建名为 <code>reverse_test.go</code> 的文件，代码如下：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> stringutil</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> <span class="string">"testing"</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">TestReverse</span><span class="params">(t *testing.T)</span></span> &#123;</span><br><span class="line">	cases := []<span class="keyword">struct</span> &#123;</span><br><span class="line">		in, want <span class="keyword">string</span></span><br><span class="line">	&#125;&#123;</span><br><span class="line">		&#123;<span class="string">"Hello, world"</span>, <span class="string">"dlrow ,olleH"</span>&#125;,</span><br><span class="line">		&#123;<span class="string">"Hello, 世界"</span>, <span class="string">"界世 ,olleH"</span>&#125;,</span><br><span class="line">		&#123;<span class="string">""</span>, <span class="string">""</span>&#125;,</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">for</span> _, c := <span class="keyword">range</span> cases &#123;</span><br><span class="line">		got := Reverse(c.in)</span><br><span class="line">		<span class="keyword">if</span> got != c.want &#123;</span><br><span class="line">			t.Errorf(<span class="string">"Reverse(%q) == %q, want %q"</span>, c.in, got, c.want)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>执行<code>go test github.com/DanielXuuuuu/stringutil</code>进行测试，结果如下：</p>
+<img src="/2019/09/12/初次接触Go语言/test.png">
+
+<p>输出为<code>ok</code>，表明通过测试。</p>
+
+    </article>
+    <!-- license  -->
+    
+        <div class="license-wrapper">
+            <p>原文作者：<a href="http://yoursite.com">Daniel Xu</a>
+            <p>原文链接：<a href="http://yoursite.com/2019/09/12/初次接触Go语言/">http://yoursite.com/2019/09/12/初次接触Go语言/</a>
+            <p>发表日期：<a href="http://yoursite.com/2019/09/12/初次接触Go语言/">September 12th 2019, 5:09:35 pm</a>
+            <p>更新日期：<a href="http://yoursite.com/2019/09/12/初次接触Go语言/">February 18th 2020, 10:30:44 pm</a>
+            <p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+                <div class="nextSlogan">Next Post</div>
+                <a href= "/2019/09/16/3D-Game-Programming-Design-空间与运动/" title= "3D Game Programming & Design - 空间与运动">
+                    <div class="nextTitle">3D Game Programming & Design - 空间与运动</div>
+                </a>
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href= "/2019/09/10/Sevice-Computing-在Linux中安装配置Go开发环境/" title= "Sevice Computing - 在Linux中安装配置Go开发环境">
+                    <div class="prevTitle">Sevice Computing - 在Linux中安装配置Go开发环境</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    <div id="disqus_thread"></div>
+    <script>
+        /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
+        
+        var disqus_config = function () {
+        this.page.url = "http://yoursite.com/2019/09/12/初次接触Go语言/";  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = "初次接触Go语言"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        };
+        
+        (function () { // DON'T EDIT BELOW THIS LINE
+            var d = document, s = d.createElement('script');
+            s.src = 'https://danielxus-blog.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+    
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:979223119@qq.com" class="iconfont-archer email" title=email ></a>
+            
+        
+    
+        
+            
+                <a href="//github.com/DanielXuuuuu" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="//juejin.im/user/5db9293ce51d452a0a3afbab" class="iconfont-archer juejin" target="_blank" title=juejin></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+    <div class="busuanzi-container">
+    
+     
+    <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+    
+    </div>
+    
+</footer>
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#准备工作"><span class="toc-number">1.</span> <span class="toc-text">准备工作</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#编程环境"><span class="toc-number">1.0.0.1.</span> <span class="toc-text">编程环境</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#GO相关"><span class="toc-number">1.0.0.2.</span> <span class="toc-text">GO相关</span></a></li></ol></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#我的第一个程序"><span class="toc-number">2.</span> <span class="toc-text">我的第一个程序</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#我的第一个包"><span class="toc-number">3.</span> <span class="toc-text">我的第一个包</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#编写测试"><span class="toc-number">4.</span> <span class="toc-text">编写测试</span></a></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 22
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2019 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/29</span><a class="archive-post-title" href= "/2019/12/29/CSS布局学习-｜-两列等高布局/" >CSS布局学习｜两列等高布局</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/16</span><a class="archive-post-title" href= "/2019/12/16/3D-Game-Programming-Design-AR小游戏/" >3D-Game-Programming-Design | AR小游戏</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/14</span><a class="archive-post-title" href= "/2019/12/14/Sevice-Computing-初识Docker/" >Sevice-Computing | 初识Docker</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/01</span><a class="archive-post-title" href= "/2019/12/01/3D-Game-Programming-Design-游戏智能/" >3D Game Programming & Design - 游戏智能</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/26</span><a class="archive-post-title" href= "/2019/11/26/《Javascript高级程序设计》学习-闭包/" >《Javascript高级程序设计》学习 | 闭包</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/24</span><a class="archive-post-title" href= "/2019/11/24/CSS布局学习-圣杯、双飞翼布局/" >CSS布局学习 | 圣杯、双飞翼布局</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/22</span><a class="archive-post-title" href= "/2019/11/22/《Javascript高级程序设计》学习-对象、原型/" >《Javascript高级程序设计》学习 | 对象、原型</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/19</span><a class="archive-post-title" href= "/2019/11/19/《Javascript高级程序设计》学习-函数、变量、作用域/" >《Javascript高级程序设计》学习 | 函数、变量、作用域</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/18</span><a class="archive-post-title" href= "/2019/11/18/MD5算法的C语言实现/" >MD5算法的C语言实现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/17</span><a class="archive-post-title" href= "/2019/11/17/3D-Game-Programming-Design-UI系统/" >3D-Game-Programming-Design-UI系统</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/29</span><a class="archive-post-title" href= "/2019/10/29/3D-Game-Programming-Design-粒子系统/" >3D-Game-Programming-Design-粒子系统</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/24</span><a class="archive-post-title" href= "/2019/10/24/3D-Game-Programming-Design-模型与动画/" >3D-Game-Programming-Design-模型与动画</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/17</span><a class="archive-post-title" href= "/2019/10/17/3D-Game-Programming-Design-物理系统与碰撞/" >3D-Game-Programming-Design - 物理系统与碰撞</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/15</span><a class="archive-post-title" href= "/2019/10/15/浅谈PoW（Proof-of-Work）共识机制/" >浅谈PoW（Proof of Work）共识机制</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/06</span><a class="archive-post-title" href= "/2019/10/06/3D-Game-Programming-Design-与游戏世界交互/" >3D-Game-Programming-Design-与游戏世界交互</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/22</span><a class="archive-post-title" href= "/2019/09/22/3D-Game-Programming-Design-游戏对象与图形基础/" >3D-Game-Programming-Design-游戏对象与图形基础</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/16</span><a class="archive-post-title" href= "/2019/09/16/3D-Game-Programming-Design-空间与运动/" >3D Game Programming & Design - 空间与运动</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span><a class="archive-post-title" href= "/2019/09/12/初次接触Go语言/" >初次接触Go语言</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/10</span><a class="archive-post-title" href= "/2019/09/10/Sevice-Computing-在Linux中安装配置Go开发环境/" >Sevice Computing - 在Linux中安装配置Go开发环境</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/04</span><a class="archive-post-title" href= "/2019/09/04/3D-Game-Programming-Design-离散仿真引擎基础/" >3D Game Programming & Design - 离散仿真引擎基础</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/01</span><a class="archive-post-title" href= "/2019/09/01/Human Resource Machine - 一款杂糅了编程元素的另类解谜游戏/" >Human Resource Machine - 一款杂糅了编程元素的另类解谜游戏</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/01</span><a class="archive-post-title" href= "/2019/09/01/Sevice-Computing-Windows环境下使用VirtualBox搭建云桌面/" >Sevice Computing - Windows环境下使用VirtualBox搭建云桌面</a>
+        </li>
+    
+    </div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="课程作业"><span class="iconfont-archer">&#xe606;</span>课程作业</span>
+    
+        <span class="sidebar-tag-name" data-tags="Unity"><span class="iconfont-archer">&#xe606;</span>Unity</span>
+    
+        <span class="sidebar-tag-name" data-tags="CSS"><span class="iconfont-archer">&#xe606;</span>CSS</span>
+    
+        <span class="sidebar-tag-name" data-tags="前端"><span class="iconfont-archer">&#xe606;</span>前端</span>
+    
+        <span class="sidebar-tag-name" data-tags="编程游戏"><span class="iconfont-archer">&#xe606;</span>编程游戏</span>
+    
+        <span class="sidebar-tag-name" data-tags="解谜"><span class="iconfont-archer">&#xe606;</span>解谜</span>
+    
+        <span class="sidebar-tag-name" data-tags="MD5"><span class="iconfont-archer">&#xe606;</span>MD5</span>
+    
+        <span class="sidebar-tag-name" data-tags="c"><span class="iconfont-archer">&#xe606;</span>c</span>
+    
+        <span class="sidebar-tag-name" data-tags="云桌面"><span class="iconfont-archer">&#xe606;</span>云桌面</span>
+    
+        <span class="sidebar-tag-name" data-tags="服务计算"><span class="iconfont-archer">&#xe606;</span>服务计算</span>
+    
+        <span class="sidebar-tag-name" data-tags="CentOS"><span class="iconfont-archer">&#xe606;</span>CentOS</span>
+    
+        <span class="sidebar-tag-name" data-tags="ssh"><span class="iconfont-archer">&#xe606;</span>ssh</span>
+    
+        <span class="sidebar-tag-name" data-tags="Docker"><span class="iconfont-archer">&#xe606;</span>Docker</span>
+    
+        <span class="sidebar-tag-name" data-tags="Go语言"><span class="iconfont-archer">&#xe606;</span>Go语言</span>
+    
+        <span class="sidebar-tag-name" data-tags="Javascript"><span class="iconfont-archer">&#xe606;</span>Javascript</span>
+    
+        <span class="sidebar-tag-name" data-tags="PoW共识机制"><span class="iconfont-archer">&#xe606;</span>PoW共识机制</span>
+    
+        <span class="sidebar-tag-name" data-tags="区块链"><span class="iconfont-archer">&#xe606;</span>区块链</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br/>
+    1、请确保node版本大于6.2<br/>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br/>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br/>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+        <span class="sidebar-category-name" data-categories="3D游戏编程"><span class="iconfont-archer">&#xe60a;</span>3D游戏编程</span>
+    
+        <span class="sidebar-category-name" data-categories="CSS学习笔记"><span class="iconfont-archer">&#xe60a;</span>CSS学习笔记</span>
+    
+        <span class="sidebar-category-name" data-categories="信息安全"><span class="iconfont-archer">&#xe60a;</span>信息安全</span>
+    
+        <span class="sidebar-category-name" data-categories="服务计算"><span class="iconfont-archer">&#xe60a;</span>服务计算</span>
+    
+        <span class="sidebar-category-name" data-categories="Javascript学习笔记"><span class="iconfont-archer">&#xe60a;</span>Javascript学习笔记</span>
+    
+        <span class="sidebar-category-name" data-categories="区块链"><span class="iconfont-archer">&#xe60a;</span>区块链</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "Daniel Xu"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+    <!-- busuanzi  -->
+    
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    </body>
+</html>
+
+

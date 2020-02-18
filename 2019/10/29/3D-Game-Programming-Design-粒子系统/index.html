@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <!-- title -->
+
+
+
+
+<!-- keywords -->
+
+
+
+
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="Daniel Xu">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Daniel Xu">
+    
+    <meta name="keywords" content="front-end,study,blog">
+    
+    <meta name="description" content="Think twice, code once.">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>3D-Game-Programming-Design-粒子系统 · Daniel&#39;s Studio</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href="/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="stylesheet" href="/css/mobile.css?v=20180824" media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href="/assets/favicon.ico">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+    <!-- fancybox -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+</head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >Daniel&#39;s Studio.</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">3D-Game-Programming-Design-粒子系统</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href=/>Daniel's Studio.</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style="
+
+
+
+
+
+
+
+height:50vh;
+">
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            3D-Game-Programming-Design-粒子系统
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class= post-intro-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "课程作业">课程作业</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "Unity">Unity</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">1.7k</span>阅读时长: <span class="post-count reading-time">7 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2019/10/29</span>
+                    
+                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                        <span class="iconfont-archer">&#xe602;</span>
+                        <span id="busuanzi_value_page_pv"></span>
+                    </span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <p>3D游戏编程课程的第八次作业：</p>
+<ul>
+<li>参考 <a href="http://i-remember.fr/en" target="_blank" rel="noopener">http://i-remember.fr/en</a> 网站，实现“粒子光环” </li>
+</ul>
+<p><a href="https://pmlpml.github.io/unity3d-learning/08-particle-system" target="_blank" rel="noopener">课程主页</a></p>
+<a id="more"></a>
+
+<h2 id="粒子光环"><a href="#粒子光环" class="headerlink" title="粒子光环"></a>粒子光环</h2><p><a href="https://github.com/DanielXuuuuu/Unity3D-Learning/tree/master/Particle_Systems" target="_blank" rel="noopener">项目地址</a></p>
+<p><a href="https://www.bilibili.com/video/av74442218/" target="_blank" rel="noopener">演示视频</a></p>
+<h4 id="原网站效果图"><a href="#原网站效果图" class="headerlink" title="原网站效果图"></a>原网站效果图</h4>
+
+<p>鼠标悬停到中间的加号时，粒子光环会收缩；鼠标离开后，恢复原状。</p>
+<h4 id="实现步骤"><a href="#实现步骤" class="headerlink" title="实现步骤"></a>实现步骤</h4><p>以下步骤是对于上图粒子光环的模仿，通过粒子流编程控制来实现。 </p>
+<p><a href="https://16sixteen.github.io/unity3d/unity3d_particle_ring" target="_blank" rel="noopener">参考博客</a></p>
+<h5 id="创建粒子系统"><a href="#创建粒子系统" class="headerlink" title="创建粒子系统"></a>创建粒子系统</h5><p>经过仔细观察，可以发现，该网站的粒子光环实际上是由两个环叠加而成，其中，外环做顺时针运动，而内环做逆时针运动，且外环比内环更粗一些，粒子也更加稀疏一点。</p>
+<p>因此，基于上述观察，我们创建两个环，项目结构如下：</p>
+<img src="/2019/10/29/3D-Game-Programming-Design-粒子系统/programStructure.png">
+
+<h5 id="外光环"><a href="#外光环" class="headerlink" title="外光环"></a>外光环</h5><p>光环的实现还是非常简单的，编程控制粒子简单来说就是创建一个很大的粒子数组，并对于这个数组中的每个粒子，设定好其初始属性以及后续的运动轨迹：在下面这段脚本代码中，我们一共创建了4500个粒子，然后设定每个粒子的运动速度。随后，在一个范围内随机生成粒子的半径信息，在一个圆周范围内随机生成粒子相对于圆心的角度信息，并且保存，使得粒子的分布呈现圆环状。</p>
+<p>在<code>Update</code>函数中，根据之前设定的速度值，随机改变角度信息并重新生成位置，然后通过<code>SetParticles</code>函数实现所有粒子位置的更新，形成粒子绕着圆周运动的视觉效果。</p>
+<p>此外，<code>Update</code>函数中用于收缩变换的部分在后文会讲到，我们在<code>nonCollectRadius</code>和<code>collectRadius</code>两个数组中记录了粒子收缩前后的位置信息。</p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">OuterRing</span> : <span class="title">MonoBehaviour</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">public</span> ParticleSystem particleSystem;</span><br><span class="line">    <span class="keyword">private</span> ParticleSystem.Particle[] particles;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> particleNum = <span class="number">4500</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">float</span>[] particleAngle;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">float</span>[] particleRadius;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">float</span>[] nonCollectRadius;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">float</span>[] collectRadius;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">float</span> minRadius = <span class="number">3.0f</span>, maxRadius = <span class="number">4.8f</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">float</span> speed = <span class="number">0.4f</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">float</span> collectSpeed = <span class="number">2.5f</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">bool</span> isCollected = <span class="literal">false</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// Start is called before the first frame update</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">Start</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        particleSystem = <span class="keyword">this</span>.GetComponent&lt;ParticleSystem&gt;();</span><br><span class="line">        particles = <span class="keyword">new</span> ParticleSystem.Particle[particleNum];</span><br><span class="line">        particleAngle = <span class="keyword">new</span> <span class="keyword">float</span>[particleNum];</span><br><span class="line">        particleRadius = <span class="keyword">new</span> <span class="keyword">float</span>[particleNum];</span><br><span class="line">        nonCollectRadius = <span class="keyword">new</span> <span class="keyword">float</span>[particleNum];</span><br><span class="line">        collectRadius = <span class="keyword">new</span> <span class="keyword">float</span>[particleNum];</span><br><span class="line">        particleSystem.maxParticles = particleNum;</span><br><span class="line">        particleSystem.Emit(particleNum);</span><br><span class="line">        particleSystem.GetParticles(particles);</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; particleNum; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">float</span> radius = Random.Range(minRadius, maxRadius);</span><br><span class="line">            <span class="keyword">float</span> angle = Random.Range(<span class="number">0.0f</span>, <span class="number">360.0f</span>);</span><br><span class="line">            <span class="keyword">float</span> rad = angle / <span class="number">180</span> * Mathf.PI;</span><br><span class="line">            particles[i].position = <span class="keyword">new</span> Vector3(radius * Mathf.Cos(rad), radius * Mathf.Sin(rad), <span class="number">0.0f</span>);</span><br><span class="line"></span><br><span class="line">            particleAngle[i] = angle;</span><br><span class="line">            particleRadius[i] = radius;</span><br><span class="line"></span><br><span class="line">            nonCollectRadius[i] = radius;</span><br><span class="line">            collectRadius[i] = radius - <span class="number">1.5f</span> * (radius / minRadius);</span><br><span class="line">        &#125;</span><br><span class="line">        particleSystem.SetParticles(particles, particleNum);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Update is called once per frame</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">Update</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; particleNum; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> (isCollected)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">if</span> (particleRadius[i] &gt; collectRadius[i])</span><br><span class="line">                &#123;</span><br><span class="line">                    particleRadius[i] -= collectSpeed * (particleRadius[i] / collectRadius[i]) * Time.deltaTime;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">if</span> (particleRadius[i] &lt; nonCollectRadius[i])</span><br><span class="line">                &#123;</span><br><span class="line">                    particleRadius[i] += collectSpeed * (nonCollectRadius[i] / particleRadius[i]) * Time.deltaTime;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">else</span> <span class="keyword">if</span> (particleRadius[i] &gt; nonCollectRadius[i])</span><br><span class="line">                &#123;</span><br><span class="line">                    particleRadius[i] = particleRadius[i];</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            particleAngle[i] -= Random.Range(<span class="number">0</span>, speed);</span><br><span class="line">            <span class="keyword">float</span> rad = particleAngle[i] / <span class="number">180</span> * Mathf.PI;</span><br><span class="line">            particles[i].position = <span class="keyword">new</span> Vector3(particleRadius[i] * Mathf.Cos(rad), particleRadius[i] * Mathf.Sin(rad), <span class="number">0.0f</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        particleSystem.SetParticles(particles, particleNum);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="内光环"><a href="#内光环" class="headerlink" title="内光环"></a>内光环</h5><p>内光环与外光环类似，改动的地方主要是粒子半径、数量的减少，粒子运动速度的变化。</p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">InnerRing</span> : <span class="title">MonoBehaviour</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">public</span> ParticleSystem particleSystem;</span><br><span class="line">    <span class="keyword">private</span> ParticleSystem.Particle[] particles;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> particleNum = <span class="number">3000</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">float</span>[] particleAngle;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">float</span>[] particleRadius;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">float</span>[] nonCollectRadius;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">float</span>[] collectRadius;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">float</span> minRadius = <span class="number">3.3f</span>, maxRadius = <span class="number">4.2f</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">float</span> speed = <span class="number">0.2f</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">float</span> collectSpeed = <span class="number">3f</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">bool</span> isCollected = <span class="literal">false</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Start is called before the first frame update</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">Start</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        particleSystem = <span class="keyword">this</span>.GetComponent&lt;ParticleSystem&gt;();</span><br><span class="line">        particles = <span class="keyword">new</span> ParticleSystem.Particle[particleNum];</span><br><span class="line">        particleAngle = <span class="keyword">new</span> <span class="keyword">float</span>[particleNum];</span><br><span class="line">        particleRadius = <span class="keyword">new</span> <span class="keyword">float</span>[particleNum];</span><br><span class="line">        nonCollectRadius = <span class="keyword">new</span> <span class="keyword">float</span>[particleNum];</span><br><span class="line">        collectRadius = <span class="keyword">new</span> <span class="keyword">float</span>[particleNum];</span><br><span class="line">        particleSystem.maxParticles = particleNum;</span><br><span class="line">        particleSystem.Emit(particleNum);</span><br><span class="line">        particleSystem.GetParticles(particles);</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; particleNum; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">float</span> radius = Random.Range(minRadius, maxRadius);</span><br><span class="line">            <span class="keyword">float</span> shiftMinAngle = Random.Range(<span class="number">0</span>, <span class="number">135</span>);</span><br><span class="line">            <span class="keyword">float</span> shiftMaxAngle = Random.Range(<span class="number">135</span>, <span class="number">180</span>);</span><br><span class="line">            <span class="keyword">float</span> angle = Random.Range(shiftMinAngle, shiftMaxAngle);</span><br><span class="line">            <span class="keyword">if</span> (Random.Range(<span class="number">0</span>, <span class="number">100</span>) &lt; <span class="number">50</span>)</span><br><span class="line">                angle += <span class="number">180.0f</span>;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">float</span> rad = angle / <span class="number">180</span> * Mathf.PI;</span><br><span class="line">            particles[i].position = <span class="keyword">new</span> Vector3(radius * Mathf.Cos(rad), radius * Mathf.Sin(rad), <span class="number">0.0f</span>);</span><br><span class="line">            particleRadius[i] = radius;</span><br><span class="line">            particleAngle[i] = angle;</span><br><span class="line"></span><br><span class="line">            nonCollectRadius[i] = radius;</span><br><span class="line">            collectRadius[i] = radius - <span class="number">1.5f</span> * (radius / minRadius);</span><br><span class="line">        &#125;</span><br><span class="line">        particleSystem.SetParticles(particles, particleNum);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Update is called once per frame</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">Update</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; particleNum; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> (isCollected)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">if</span> (particleRadius[i] &gt; collectRadius[i])</span><br><span class="line">                &#123;</span><br><span class="line">                    particleRadius[i] -= collectSpeed * (particleRadius[i] / collectRadius[i]) * Time.deltaTime;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">if</span> (particleRadius[i] &lt; nonCollectRadius[i])</span><br><span class="line">                &#123;</span><br><span class="line">                    particleRadius[i] += collectSpeed * (nonCollectRadius[i] / particleRadius[i]) * Time.deltaTime;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">else</span> <span class="keyword">if</span> (particleRadius[i] &gt; nonCollectRadius[i])</span><br><span class="line">                &#123;</span><br><span class="line">                    particleRadius[i] = particleRadius[i];</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            particleAngle[i] += Random.Range(<span class="number">0</span>, speed);</span><br><span class="line">            <span class="keyword">float</span> rad = particleAngle[i] / <span class="number">180</span> * Mathf.PI;</span><br><span class="line">            particles[i].position = <span class="keyword">new</span> Vector3(particleRadius[i] * Mathf.Cos(rad), particleRadius[i] * Mathf.Sin(rad), <span class="number">0.0f</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        particleSystem.SetParticles(particles, particleNum);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="优化"><a href="#优化" class="headerlink" title="优化"></a>优化</h5><p>基于上述步骤，得到的结果如下：</p>
+<img src="/2019/10/29/3D-Game-Programming-Design-粒子系统/game1.png">
+
+<p>可以看到，由于我们通过随机数生成两个圆的半径，所以粒子在圆环中的分布很均匀，导致内外粒子光环的边界比较分明，视觉效果并不是很好，因此，参考师兄的博客，对于两个光环中粒子的半径设定都做以下修改：</p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">float</span> midR = (maxRadius + minRadius) / <span class="number">2</span>;</span><br><span class="line"><span class="comment">//最小半径随机扩大</span></span><br><span class="line"><span class="keyword">float</span> rate1 = Random.Range(<span class="number">1.0f</span>, midR / minRadius);</span><br><span class="line"><span class="comment">//最大半径随机缩小</span></span><br><span class="line"><span class="keyword">float</span> rate2 = Random.Range(midR / maxRadius, <span class="number">1.0f</span>);</span><br><span class="line"><span class="keyword">float</span> radius = Random.Range(minRadius * rate1, maxRadius * rate2);</span><br></pre></td></tr></table></figure>
+
+<h5 id="聚集效果"><a href="#聚集效果" class="headerlink" title="聚集效果"></a>聚集效果</h5><p>原网站的效果是鼠标悬浮到圆心时整个光环就会向内聚集，离开后恢复。这里通过两个按钮实现类似的效果。</p>
+<h6 id="两个光环"><a href="#两个光环" class="headerlink" title="两个光环"></a>两个光环</h6><p>两个光环的实现方式类似，通过增加一个<code>isCollected</code>属性，控制其粒子的半径即可，在之前就已经提到，我们已经设定好了收缩和恢复前后的半径大小（我们使用固定值），那么直接根据<code>isCollected</code>属性判断当前所使用的半径即可。具体的<code>Update</code>函数如下：</p>
+<figure class="highlight matlab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">void Update()</span><br><span class="line">	&#123;</span><br><span class="line">        <span class="keyword">for</span> (int <span class="built_in">i</span> = <span class="number">0</span>; <span class="built_in">i</span> &lt; particleNum; <span class="built_in">i</span>++)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">if</span> (isCollected)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">if</span> (particleRadius[<span class="built_in">i</span>] &gt; collectRadius[<span class="built_in">i</span>])</span><br><span class="line">                &#123;</span><br><span class="line">                    particleRadius[<span class="built_in">i</span>] -= collectSpeed * (particleRadius[<span class="built_in">i</span>] / collectRadius[<span class="built_in">i</span>]) * Time.deltaTime;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">else</span></span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">if</span> (particleRadius[<span class="built_in">i</span>] &lt; nonCollectRadius[<span class="built_in">i</span>])</span><br><span class="line">                &#123;</span><br><span class="line">                    particleRadius[<span class="built_in">i</span>] += collectSpeed * (nonCollectRadius[<span class="built_in">i</span>] / particleRadius[<span class="built_in">i</span>]) * Time.deltaTime;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">else</span> <span class="keyword">if</span> (particleRadius[<span class="built_in">i</span>] &gt; nonCollectRadius[<span class="built_in">i</span>])</span><br><span class="line">                &#123;</span><br><span class="line">                    particleRadius[<span class="built_in">i</span>] = particleRadius[<span class="built_in">i</span>];</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            particleAngle[<span class="built_in">i</span>] -= Random.Range(<span class="number">0</span>, speed);</span><br><span class="line">            float rad = particleAngle[<span class="built_in">i</span>] / <span class="number">180</span> * Mathf.PI;</span><br><span class="line">            particles[<span class="built_in">i</span>].position = new Vector3(particleRadius[<span class="built_in">i</span>] * Mathf.Cos(rad), particleRadius[<span class="built_in">i</span>] * Mathf.Sin(rad), <span class="number">0.0</span>f);</span><br><span class="line">        &#125;</span><br><span class="line">        particleSystem.SetParticles(particles, particleNum);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<h6 id="UserGUI"><a href="#UserGUI" class="headerlink" title="UserGUI"></a>UserGUI</h6><p>和之前类似，使用UserGUI实现“收”和“散”两个按钮负责与用户进行交互。由于本次项目比较简单，没有控制器来传递消息，这里就直接通过函数<code>GetComponentsInChildren&lt;OuterRing&gt;()</code>，并且将以下脚本挂载到<code>Ring</code>这个空对象上，就可以得到它两个子对象——内外两个光环，从而控制之前介绍的<code>isCollected</code>属性。</p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">UserGUI</span> : <span class="title">MonoBehaviour</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">private</span> OuterRing[] outerRing;</span><br><span class="line">    <span class="keyword">private</span> InnerRing[] innerRing;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">Start</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        outerRing = GetComponentsInChildren&lt;OuterRing&gt;() <span class="keyword">as</span> OuterRing[];</span><br><span class="line">        innerRing = GetComponentsInChildren&lt;InnerRing&gt;() <span class="keyword">as</span> InnerRing[];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">OnGUI</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        GUIStyle button_style;</span><br><span class="line">        button_style = <span class="keyword">new</span> GUIStyle(<span class="string">"button"</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            fontSize = <span class="number">15</span></span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="keyword">if</span>(GUI.Button(<span class="keyword">new</span> Rect(Screen.width - <span class="number">150</span>, Screen.height - <span class="number">100</span>, <span class="number">100</span>, <span class="number">30</span>), <span class="string">"收"</span>, button_style))</span><br><span class="line">        &#123;</span><br><span class="line">            outerRing[<span class="number">0</span>].isCollected = <span class="literal">true</span>;</span><br><span class="line">            innerRing[<span class="number">0</span>].isCollected = <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span>(GUI.Button(<span class="keyword">new</span> Rect(Screen.width - <span class="number">150</span>, Screen.height - <span class="number">50</span>, <span class="number">100</span>, <span class="number">30</span>), <span class="string">"散"</span>, button_style))</span><br><span class="line">        &#123;</span><br><span class="line">            outerRing[<span class="number">0</span>].isCollected = <span class="literal">false</span>;</span><br><span class="line">            innerRing[<span class="number">0</span>].isCollected = <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="最终效果"><a href="#最终效果" class="headerlink" title="最终效果"></a>最终效果</h4><img src="/2019/10/29/3D-Game-Programming-Design-粒子系统/game2.png">
+
+
+    </article>
+    <!-- license  -->
+    
+        <div class="license-wrapper">
+            <p>原文作者：<a href="http://yoursite.com">Daniel Xu</a>
+            <p>原文链接：<a href="http://yoursite.com/2019/10/29/3D-Game-Programming-Design-粒子系统/">http://yoursite.com/2019/10/29/3D-Game-Programming-Design-粒子系统/</a>
+            <p>发表日期：<a href="http://yoursite.com/2019/10/29/3D-Game-Programming-Design-粒子系统/">October 29th 2019, 1:49:22 pm</a>
+            <p>更新日期：<a href="http://yoursite.com/2019/10/29/3D-Game-Programming-Design-粒子系统/">February 18th 2020, 10:32:46 pm</a>
+            <p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+                <div class="nextSlogan">Next Post</div>
+                <a href= "/2019/11/17/3D-Game-Programming-Design-UI系统/" title= "3D-Game-Programming-Design-UI系统">
+                    <div class="nextTitle">3D-Game-Programming-Design-UI系统</div>
+                </a>
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href= "/2019/10/24/3D-Game-Programming-Design-模型与动画/" title= "3D-Game-Programming-Design-模型与动画">
+                    <div class="prevTitle">3D-Game-Programming-Design-模型与动画</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    <div id="disqus_thread"></div>
+    <script>
+        /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
+        
+        var disqus_config = function () {
+        this.page.url = "http://yoursite.com/2019/10/29/3D-Game-Programming-Design-粒子系统/";  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = "3D-Game-Programming-Design-粒子系统"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        };
+        
+        (function () { // DON'T EDIT BELOW THIS LINE
+            var d = document, s = d.createElement('script');
+            s.src = 'https://danielxus-blog.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+    
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:979223119@qq.com" class="iconfont-archer email" title=email ></a>
+            
+        
+    
+        
+            
+                <a href="//github.com/DanielXuuuuu" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="//juejin.im/user/5db9293ce51d452a0a3afbab" class="iconfont-archer juejin" target="_blank" title=juejin></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+    <div class="busuanzi-container">
+    
+     
+    <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+    
+    </div>
+    
+</footer>
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#粒子光环"><span class="toc-number">1.</span> <span class="toc-text">粒子光环</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#原网站效果图"><span class="toc-number">1.0.1.</span> <span class="toc-text">原网站效果图</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#实现步骤"><span class="toc-number">1.0.2.</span> <span class="toc-text">实现步骤</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#创建粒子系统"><span class="toc-number">1.0.2.1.</span> <span class="toc-text">创建粒子系统</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#外光环"><span class="toc-number">1.0.2.2.</span> <span class="toc-text">外光环</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#内光环"><span class="toc-number">1.0.2.3.</span> <span class="toc-text">内光环</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#优化"><span class="toc-number">1.0.2.4.</span> <span class="toc-text">优化</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#聚集效果"><span class="toc-number">1.0.2.5.</span> <span class="toc-text">聚集效果</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#两个光环"><span class="toc-number">1.0.2.5.1.</span> <span class="toc-text">两个光环</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#UserGUI"><span class="toc-number">1.0.2.5.2.</span> <span class="toc-text">UserGUI</span></a></li></ol></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#最终效果"><span class="toc-number">1.0.3.</span> <span class="toc-text">最终效果</span></a></li></ol></li></ol></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 22
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2019 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/29</span><a class="archive-post-title" href= "/2019/12/29/CSS布局学习-｜-两列等高布局/" >CSS布局学习｜两列等高布局</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/16</span><a class="archive-post-title" href= "/2019/12/16/3D-Game-Programming-Design-AR小游戏/" >3D-Game-Programming-Design | AR小游戏</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/14</span><a class="archive-post-title" href= "/2019/12/14/Sevice-Computing-初识Docker/" >Sevice-Computing | 初识Docker</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/01</span><a class="archive-post-title" href= "/2019/12/01/3D-Game-Programming-Design-游戏智能/" >3D Game Programming & Design - 游戏智能</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/26</span><a class="archive-post-title" href= "/2019/11/26/《Javascript高级程序设计》学习-闭包/" >《Javascript高级程序设计》学习 | 闭包</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/24</span><a class="archive-post-title" href= "/2019/11/24/CSS布局学习-圣杯、双飞翼布局/" >CSS布局学习 | 圣杯、双飞翼布局</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/22</span><a class="archive-post-title" href= "/2019/11/22/《Javascript高级程序设计》学习-对象、原型/" >《Javascript高级程序设计》学习 | 对象、原型</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/19</span><a class="archive-post-title" href= "/2019/11/19/《Javascript高级程序设计》学习-函数、变量、作用域/" >《Javascript高级程序设计》学习 | 函数、变量、作用域</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/18</span><a class="archive-post-title" href= "/2019/11/18/MD5算法的C语言实现/" >MD5算法的C语言实现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/17</span><a class="archive-post-title" href= "/2019/11/17/3D-Game-Programming-Design-UI系统/" >3D-Game-Programming-Design-UI系统</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/29</span><a class="archive-post-title" href= "/2019/10/29/3D-Game-Programming-Design-粒子系统/" >3D-Game-Programming-Design-粒子系统</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/24</span><a class="archive-post-title" href= "/2019/10/24/3D-Game-Programming-Design-模型与动画/" >3D-Game-Programming-Design-模型与动画</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/17</span><a class="archive-post-title" href= "/2019/10/17/3D-Game-Programming-Design-物理系统与碰撞/" >3D-Game-Programming-Design - 物理系统与碰撞</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/15</span><a class="archive-post-title" href= "/2019/10/15/浅谈PoW（Proof-of-Work）共识机制/" >浅谈PoW（Proof of Work）共识机制</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/06</span><a class="archive-post-title" href= "/2019/10/06/3D-Game-Programming-Design-与游戏世界交互/" >3D-Game-Programming-Design-与游戏世界交互</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/22</span><a class="archive-post-title" href= "/2019/09/22/3D-Game-Programming-Design-游戏对象与图形基础/" >3D-Game-Programming-Design-游戏对象与图形基础</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/16</span><a class="archive-post-title" href= "/2019/09/16/3D-Game-Programming-Design-空间与运动/" >3D Game Programming & Design - 空间与运动</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span><a class="archive-post-title" href= "/2019/09/12/初次接触Go语言/" >初次接触Go语言</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/10</span><a class="archive-post-title" href= "/2019/09/10/Sevice-Computing-在Linux中安装配置Go开发环境/" >Sevice Computing - 在Linux中安装配置Go开发环境</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/04</span><a class="archive-post-title" href= "/2019/09/04/3D-Game-Programming-Design-离散仿真引擎基础/" >3D Game Programming & Design - 离散仿真引擎基础</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/01</span><a class="archive-post-title" href= "/2019/09/01/Human Resource Machine - 一款杂糅了编程元素的另类解谜游戏/" >Human Resource Machine - 一款杂糅了编程元素的另类解谜游戏</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/01</span><a class="archive-post-title" href= "/2019/09/01/Sevice-Computing-Windows环境下使用VirtualBox搭建云桌面/" >Sevice Computing - Windows环境下使用VirtualBox搭建云桌面</a>
+        </li>
+    
+    </div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="课程作业"><span class="iconfont-archer">&#xe606;</span>课程作业</span>
+    
+        <span class="sidebar-tag-name" data-tags="Unity"><span class="iconfont-archer">&#xe606;</span>Unity</span>
+    
+        <span class="sidebar-tag-name" data-tags="CSS"><span class="iconfont-archer">&#xe606;</span>CSS</span>
+    
+        <span class="sidebar-tag-name" data-tags="前端"><span class="iconfont-archer">&#xe606;</span>前端</span>
+    
+        <span class="sidebar-tag-name" data-tags="编程游戏"><span class="iconfont-archer">&#xe606;</span>编程游戏</span>
+    
+        <span class="sidebar-tag-name" data-tags="解谜"><span class="iconfont-archer">&#xe606;</span>解谜</span>
+    
+        <span class="sidebar-tag-name" data-tags="MD5"><span class="iconfont-archer">&#xe606;</span>MD5</span>
+    
+        <span class="sidebar-tag-name" data-tags="c"><span class="iconfont-archer">&#xe606;</span>c</span>
+    
+        <span class="sidebar-tag-name" data-tags="云桌面"><span class="iconfont-archer">&#xe606;</span>云桌面</span>
+    
+        <span class="sidebar-tag-name" data-tags="服务计算"><span class="iconfont-archer">&#xe606;</span>服务计算</span>
+    
+        <span class="sidebar-tag-name" data-tags="CentOS"><span class="iconfont-archer">&#xe606;</span>CentOS</span>
+    
+        <span class="sidebar-tag-name" data-tags="ssh"><span class="iconfont-archer">&#xe606;</span>ssh</span>
+    
+        <span class="sidebar-tag-name" data-tags="Docker"><span class="iconfont-archer">&#xe606;</span>Docker</span>
+    
+        <span class="sidebar-tag-name" data-tags="Go语言"><span class="iconfont-archer">&#xe606;</span>Go语言</span>
+    
+        <span class="sidebar-tag-name" data-tags="Javascript"><span class="iconfont-archer">&#xe606;</span>Javascript</span>
+    
+        <span class="sidebar-tag-name" data-tags="PoW共识机制"><span class="iconfont-archer">&#xe606;</span>PoW共识机制</span>
+    
+        <span class="sidebar-tag-name" data-tags="区块链"><span class="iconfont-archer">&#xe606;</span>区块链</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br/>
+    1、请确保node版本大于6.2<br/>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br/>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br/>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+        <span class="sidebar-category-name" data-categories="3D游戏编程"><span class="iconfont-archer">&#xe60a;</span>3D游戏编程</span>
+    
+        <span class="sidebar-category-name" data-categories="CSS学习笔记"><span class="iconfont-archer">&#xe60a;</span>CSS学习笔记</span>
+    
+        <span class="sidebar-category-name" data-categories="信息安全"><span class="iconfont-archer">&#xe60a;</span>信息安全</span>
+    
+        <span class="sidebar-category-name" data-categories="服务计算"><span class="iconfont-archer">&#xe60a;</span>服务计算</span>
+    
+        <span class="sidebar-category-name" data-categories="Javascript学习笔记"><span class="iconfont-archer">&#xe60a;</span>Javascript学习笔记</span>
+    
+        <span class="sidebar-category-name" data-categories="区块链"><span class="iconfont-archer">&#xe60a;</span>区块链</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "Daniel Xu"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+    <!-- busuanzi  -->
+    
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    </body>
+</html>
+
+

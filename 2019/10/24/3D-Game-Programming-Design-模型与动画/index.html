@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <!-- title -->
+
+
+
+
+<!-- keywords -->
+
+
+
+
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="Daniel Xu">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Daniel Xu">
+    
+    <meta name="keywords" content="front-end,study,blog">
+    
+    <meta name="description" content="Think twice, code once.">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>3D-Game-Programming-Design-模型与动画 · Daniel&#39;s Studio</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href="/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="stylesheet" href="/css/mobile.css?v=20180824" media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href="/assets/favicon.ico">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+    <!-- fancybox -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+</head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >Daniel&#39;s Studio.</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">3D-Game-Programming-Design-模型与动画</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href=/>Daniel's Studio.</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style="
+
+
+
+
+
+
+
+height:50vh;
+">
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            3D-Game-Programming-Design-模型与动画
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class= post-intro-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "课程作业">课程作业</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "Unity">Unity</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">2.6k</span>阅读时长: <span class="post-count reading-time">12 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2019/10/24</span>
+                    
+                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                        <span class="iconfont-archer">&#xe602;</span>
+                        <span id="busuanzi_value_page_pv"></span>
+                    </span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <p>3D游戏编程课程的第七次作业：</p>
+<ul>
+<li>智能巡逻兵 </li>
+</ul>
+<p><a href="https://pmlpml.github.io/unity3d-learning/07-model-and-animation" target="_blank" rel="noopener">课程主页</a></p>
+<a id="more"></a>
+
+<h2 id="智能巡逻兵"><a href="#智能巡逻兵" class="headerlink" title="智能巡逻兵"></a>智能巡逻兵</h2><p><a href="https://github.com/DanielXuuuuu/Unity3D-Learning/tree/master/AI_Patrol" target="_blank" rel="noopener">项目地址</a></p>
+<p><a href="https://www.bilibili.com/video/av73372763/" target="_blank" rel="noopener">演示视频</a></p>
+<h3 id="设计要求"><a href="#设计要求" class="headerlink" title="设计要求"></a>设计要求</h3><ul>
+<li>游戏设计要求：<ul>
+<li>创建一个地图和若干巡逻兵(使用动画)；</li>
+<li>每个巡逻兵走一个3~5个边的凸多边型，位置数据是相对地址。即每次确定下一个目标位置，用自己当前位置为原点计算；</li>
+<li>巡逻兵碰撞到障碍物，则会自动选下一个点为目标；</li>
+<li>巡逻兵在设定范围内感知到玩家，会自动追击玩家；</li>
+<li>失去玩家目标后，继续巡逻；</li>
+<li>计分：玩家每次甩掉一个巡逻兵计一分，与巡逻兵碰撞游戏结束；</li>
+</ul>
+</li>
+<li>程序设计要求：<ul>
+<li>必须使用订阅与发布模式传消息</li>
+<li>工厂模式生产巡逻兵</li>
+</ul>
+</li>
+</ul>
+<h3 id="设计实现"><a href="#设计实现" class="headerlink" title="设计实现"></a>设计实现</h3><h4 id="巡逻兵"><a href="#巡逻兵" class="headerlink" title="巡逻兵"></a>巡逻兵</h4><h5 id="巡逻兵数据"><a href="#巡逻兵数据" class="headerlink" title="巡逻兵数据"></a>巡逻兵数据</h5><figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="symbol">PatrolData</span> : <span class="symbol">MonoBehaviour</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="built_in">int</span> manageFloor;       <span class="comment">// 管理的房间</span></span><br><span class="line">    <span class="keyword">public</span> <span class="built_in">int</span> plyerFloor;        <span class="comment">// 玩家当前所在房间</span></span><br><span class="line">    <span class="keyword">public</span> Vector3 initPosition;  <span class="comment">// 初始位置</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="巡逻兵工厂"><a href="#巡逻兵工厂" class="headerlink" title="巡逻兵工厂"></a>巡逻兵工厂</h5><p>巡逻兵工厂负责产生一定数量、预定位置的巡逻兵，并记录每个巡逻兵相应的管辖范围。</p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">PatrolFactory</span> : <span class="title">MonoBehaviour</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">private</span> GameObject patrolPrefab = <span class="literal">null</span>;</span><br><span class="line">    <span class="keyword">private</span> Vector3[] position = <span class="keyword">new</span> Vector3[<span class="number">6</span>]; <span class="comment">//记录巡逻兵的位置</span></span><br><span class="line">    <span class="keyword">private</span> List&lt;GameObject&gt; patrols = <span class="keyword">new</span> List&lt;GameObject&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> List&lt;GameObject&gt; <span class="title">GetPatrols</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        <span class="keyword">int</span>[] pos_x = &#123; <span class="number">-10</span>, <span class="number">3</span>, <span class="number">18</span>, <span class="number">-11</span>, <span class="number">3</span>, <span class="number">15</span> &#125;;</span><br><span class="line">        <span class="keyword">int</span>[] pos_z = &#123; <span class="number">-18</span>, <span class="number">-15</span>, <span class="number">-15</span>, <span class="number">12</span>, <span class="number">10</span>, <span class="number">13</span> &#125;;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">6</span>; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            position[i] = <span class="keyword">new</span> Vector3(pos_x[i], <span class="number">0</span>, pos_z[i]);</span><br><span class="line">            patrolPrefab = Object.Instantiate(Resources.Load&lt;GameObject&gt;(<span class="string">"Prefabs/patrol2"</span>), position[i], Quaternion.identity);</span><br><span class="line">            patrolPrefab.name = <span class="string">"patrol"</span> + i;</span><br><span class="line">            patrolPrefab.AddComponent&lt;PatrolData&gt;();</span><br><span class="line"></span><br><span class="line">            patrolPrefab.GetComponent&lt;PatrolData&gt;().manageFloor = i + <span class="number">1</span>;</span><br><span class="line">            patrolPrefab.GetComponent&lt;PatrolData&gt;().initPosition = position[i];</span><br><span class="line">            patrols.Add(patrolPrefab);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> patrols;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">Reset</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; patrols.Count; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            patrols[i].transform.position = position[i];</span><br><span class="line">            patrols[i].GetComponent&lt;Animator&gt;().SetBool(<span class="string">"shoot"</span>, <span class="literal">false</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="巡逻兵动作"><a href="#巡逻兵动作" class="headerlink" title="巡逻兵动作"></a>巡逻兵动作</h5><p>巡逻兵动作一共有两种：普通巡逻和追踪敌人，动作的切换通过回调函数实现。</p>
+<h6 id="巡逻动作"><a href="#巡逻动作" class="headerlink" title="巡逻动作"></a>巡逻动作</h6><p>每个巡逻兵都按照简单的矩形路线不断重复运动，每当到达指定的顶点就换方向。在每次巡逻的同时，判断玩家所在区域是不是自己管辖的区域。如果是，则停止巡逻，开始追击玩家（销毁当前动作，执行回调函数）。</p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">PatrolMoveAction</span> : <span class="title">SSAction</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">float</span> posX, posZ;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">float</span> rectLength;                           <span class="comment">// 边长</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">enum</span> Dirction &#123; EAST, NORTH, WEST, SOUTH &#125;; <span class="comment">// 巡逻的四个方向</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">float</span> speed = <span class="number">2f</span>;                           <span class="comment">// 巡逻速度</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">bool</span> reach = <span class="literal">true</span>;                          <span class="comment">// 是否到达目的地</span></span><br><span class="line">    <span class="keyword">private</span> Dirction dirction = Dirction.EAST;          <span class="comment">// 移动的方向</span></span><br><span class="line">    <span class="keyword">private</span> PatrolData data;                            <span class="comment">// 巡逻兵的数据</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> PatrolMoveAction <span class="title">GetSSAction</span>(<span class="params">Vector3 location</span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        PatrolMoveAction action = CreateInstance&lt;PatrolMoveAction&gt;();</span><br><span class="line">        action.posX = location.x;</span><br><span class="line">        action.posZ = location.z;</span><br><span class="line"></span><br><span class="line">        action.rectLength = Random.Range(<span class="number">5</span>, <span class="number">8</span>);</span><br><span class="line">        <span class="keyword">return</span> action;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">override</span> <span class="keyword">void</span> <span class="title">Start</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        data = <span class="keyword">this</span>.gameObject.GetComponent&lt;PatrolData&gt;();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">override</span> <span class="keyword">void</span> <span class="title">Update</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        <span class="comment">//防止碰撞发生后的旋转</span></span><br><span class="line">        <span class="keyword">if</span> (transform.localEulerAngles.x != <span class="number">0</span> || transform.localEulerAngles.z != <span class="number">0</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            transform.localEulerAngles = <span class="keyword">new</span> Vector3(<span class="number">0</span>, transform.localEulerAngles.y, <span class="number">0</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (transform.position.y != <span class="number">0.5f</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            transform.position = <span class="keyword">new</span> Vector3(transform.position.x, <span class="number">0.5f</span>, transform.position.z);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 移动</span></span><br><span class="line">        Move();</span><br><span class="line">         </span><br><span class="line">        <span class="comment">// 如果所在房间相同，摧毁当前动作并回调</span></span><br><span class="line">        <span class="keyword">if</span> (data.manageFloor == data.plyerFloor)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">this</span>.destory = <span class="literal">true</span>;</span><br><span class="line">            <span class="keyword">this</span>.callback.SSActionEvent(<span class="keyword">this</span>, SSActionEventType.Compeleted, <span class="number">0</span> ,<span class="string">"follow player"</span>, <span class="keyword">this</span>.gameObject);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">Move</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        <span class="keyword">if</span> (reach)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="comment">// 如果已到达，就换方向</span></span><br><span class="line">            <span class="keyword">switch</span> (dirction)</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="keyword">case</span> Dirction.EAST:</span><br><span class="line">                    posX -= rectLength;</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                <span class="keyword">case</span> Dirction.NORTH:</span><br><span class="line">                    posZ += rectLength;</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                <span class="keyword">case</span> Dirction.WEST:</span><br><span class="line">                    posX += rectLength;</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                <span class="keyword">case</span> Dirction.SOUTH:</span><br><span class="line">                    posZ -= rectLength;</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            reach = <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//面朝目的地</span></span><br><span class="line">        <span class="keyword">this</span>.transform.LookAt(<span class="keyword">new</span> Vector3(posX, <span class="number">0.5f</span>, posZ));</span><br><span class="line"></span><br><span class="line">        <span class="comment">//计算距离</span></span><br><span class="line">        <span class="keyword">float</span> distance = Vector3.Distance(transform.position, <span class="keyword">new</span> Vector3(posX, <span class="number">0.5f</span>, posZ));</span><br><span class="line">        <span class="keyword">if</span> (distance &gt; <span class="number">1</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            transform.position = Vector3.MoveTowards(<span class="keyword">this</span>.transform.position, <span class="keyword">new</span> Vector3(posX, <span class="number">0.5f</span>, posZ), speed * Time.deltaTime);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">        &#123;</span><br><span class="line">            dirction = dirction + <span class="number">1</span>;</span><br><span class="line">            <span class="keyword">if</span> (dirction &gt; Dirction.SOUTH)</span><br><span class="line">            &#123;</span><br><span class="line">                dirction = Dirction.EAST;</span><br><span class="line">            &#125;</span><br><span class="line">            reach = <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h6 id="追踪玩家动作"><a href="#追踪玩家动作" class="headerlink" title="追踪玩家动作"></a>追踪玩家动作</h6><p>追踪动作比较简单，创建该动作时会传入玩家对象，之后都朝着玩家的位置移动即可。在动作执行的同时判断玩家是否离开管辖区域，如果离开了，就重新开始巡逻（销毁当前动作，执行回调函数）。</p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">PatrolFollowAction</span> : <span class="title">SSAction</span></span><br><span class="line">&#123;     </span><br><span class="line">    <span class="keyword">private</span> GameObject player;        <span class="comment">// 创建动作时传入玩家对象，以便对玩家进行追踪</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">float</span> speed = <span class="number">3f</span>;         <span class="comment">// 追踪玩家的速度</span></span><br><span class="line">    <span class="keyword">private</span> PatrolData data;          <span class="comment">// 巡逻兵数据</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> PatrolFollowAction <span class="title">GetSSAction</span>(<span class="params">GameObject player</span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        PatrolFollowAction action = CreateInstance&lt;PatrolFollowAction&gt;();</span><br><span class="line">        action.player = player;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> action;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">override</span> <span class="keyword">void</span> <span class="title">Start</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        data = <span class="keyword">this</span>.gameObject.GetComponent&lt;PatrolData&gt;();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">override</span> <span class="keyword">void</span> <span class="title">Update</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        <span class="keyword">if</span> (transform.localEulerAngles.x != <span class="number">0</span> || transform.localEulerAngles.z != <span class="number">0</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            transform.localEulerAngles = <span class="keyword">new</span> Vector3(<span class="number">0</span>, transform.localEulerAngles.y, <span class="number">0</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (transform.position.y != <span class="number">0.5f</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            transform.position = <span class="keyword">new</span> Vector3(transform.position.x, <span class="number">0.5f</span>, transform.position.z);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        transform.position = Vector3.MoveTowards(<span class="keyword">this</span>.transform.position, player.transform.position, speed * Time.deltaTime);</span><br><span class="line">        <span class="comment">//追踪时面朝玩家</span></span><br><span class="line">        <span class="keyword">this</span>.transform.LookAt(player.transform.position);</span><br><span class="line"></span><br><span class="line">        <span class="comment">//丢失目标，停止追踪</span></span><br><span class="line">        <span class="comment">//如果侦察兵没有跟随对象，或者需要跟随的玩家不在侦查兵的区域内</span></span><br><span class="line">        <span class="keyword">if</span> (data.manageFloor != data.plyerFloor)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">this</span>.destory = <span class="literal">true</span>;</span><br><span class="line">            <span class="keyword">this</span>.callback.SSActionEvent(<span class="keyword">this</span>, SSActionEventType.Compeleted, <span class="number">1</span>, <span class="string">"stop follow"</span>, <span class="keyword">this</span>.gameObject);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="巡逻兵动作管理器"><a href="#巡逻兵动作管理器" class="headerlink" title="巡逻兵动作管理器"></a>巡逻兵动作管理器</h5><p>动作管理器主要负责的是在游戏的开始让巡逻兵开始巡逻，并通过回调函数处理不同的情况：根据回调的参数不同，进行巡逻动作和追踪动作的切换。同时，在由追踪切换为巡逻时，需要发布玩家逃脱的消息，进行后续的处理。</p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">PatrolActionManager</span> : <span class="title">SSActionManager</span>, <span class="title">ISSActionCallback</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">//巡逻动作</span></span><br><span class="line">    <span class="keyword">private</span> PatrolMoveAction move;</span><br><span class="line">    <span class="keyword">private</span> SceneController sceneController;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> new <span class="keyword">void</span> <span class="title">Start</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        sceneController = SSDirector.GetInstance().CurrentSceneController <span class="keyword">as</span> SceneController;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">PatrolMove</span>(<span class="params">GameObject patrol</span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        move = PatrolMoveAction.GetSSAction(patrol.transform.position);</span><br><span class="line">        <span class="keyword">this</span>.RunAction(patrol, move, <span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">#<span class="meta-keyword">region</span> ISSActionCallback implementation</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">SSActionEvent</span>(<span class="params">SSAction source,</span></span></span><br><span class="line"><span class="function"><span class="params">        SSActionEventType events = SSActionEventType.Compeleted,</span></span></span><br><span class="line"><span class="function"><span class="params">        <span class="keyword">int</span> intParam = <span class="number">0</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">        <span class="keyword">string</span> strParam = <span class="literal">null</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">        GameObject objectParam = <span class="literal">null</span></span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        <span class="comment">//回调函数,动作执行完后调用</span></span><br><span class="line">        <span class="keyword">if</span> (intParam == <span class="number">0</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="comment">//开始跟随玩家</span></span><br><span class="line">            PatrolFollowAction follow = PatrolFollowAction.GetSSAction(sceneController.player);</span><br><span class="line">            <span class="keyword">this</span>.RunAction(objectParam, follow, <span class="keyword">this</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">        &#123;</span><br><span class="line">            <span class="comment">//丢失目标，继续巡逻</span></span><br><span class="line">            PatrolMoveAction move = PatrolMoveAction.GetSSAction(objectParam.gameObject.GetComponent&lt;PatrolData&gt;().initPosition);</span><br><span class="line">            <span class="keyword">this</span>.RunAction(objectParam, move, <span class="keyword">this</span>);</span><br><span class="line">            <span class="comment">//玩家逃脱</span></span><br><span class="line">            Singleton&lt;GameEventManager&gt;.Instance.PlayerEscape();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">#<span class="meta-keyword">endregion</span></span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="玩家"><a href="#玩家" class="headerlink" title="玩家"></a>玩家</h4><h5 id="玩家移动"><a href="#玩家移动" class="headerlink" title="玩家移动"></a>玩家移动</h5><p>玩家移动的实现通过获取键盘输入并执行相应的函数完成。这里实现的移动可以通过方向键来控制，上下表示前进和后退，左右表示转向，类似于汽车游戏。</p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// UserGUI.cs</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">Update</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">float</span> transitionX = Input.GetAxis(<span class="string">"Horizontal"</span>);</span><br><span class="line">    <span class="keyword">float</span> transitionZ = Input.GetAxis(<span class="string">"Vertical"</span>);</span><br><span class="line">    <span class="comment">//移动玩家</span></span><br><span class="line">    action.MovePlayer(transitionX, transitionZ);</span><br><span class="line">    timeCounter = action.GetTime();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// SceneController.cs</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">MovePlayer</span>(<span class="params"><span class="keyword">float</span> x, <span class="keyword">float</span> z</span>)</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (!gameOver)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">//移动和旋转</span></span><br><span class="line">        player.transform.Translate(<span class="number">0</span>, <span class="number">0</span>, z * playerSpeed * Time.deltaTime);</span><br><span class="line">        player.transform.Rotate(<span class="number">0</span>, x * <span class="number">135f</span> * Time.deltaTime, <span class="number">0</span>);</span><br><span class="line">        <span class="comment">//防止碰撞带来的移动</span></span><br><span class="line">        <span class="keyword">if</span> (player.transform.localEulerAngles.x != <span class="number">0</span> || player.transform.localEulerAngles.z != <span class="number">0</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            player.transform.localEulerAngles = <span class="keyword">new</span> Vector3(<span class="number">0</span>, player.transform.localEulerAngles.y, <span class="number">0</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (player.transform.position.y != <span class="number">0.5f</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            player.transform.position = <span class="keyword">new</span> Vector3(player.transform.position.x, <span class="number">0.5f</span>, player.transform.position.z);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="碰撞事件"><a href="#碰撞事件" class="headerlink" title="碰撞事件"></a>碰撞事件</h4><h5 id="玩家与地图碰撞"><a href="#玩家与地图碰撞" class="headerlink" title="玩家与地图碰撞"></a>玩家与地图碰撞</h5><p>为不同的房间添加以下脚本，每个房间的<code>sign</code>值不同，通过玩家与不同房间地面的碰撞更新玩家的位置。</p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">AreaCollide</span> : <span class="title">MonoBehaviour</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">int</span> sign = <span class="number">0</span>;</span><br><span class="line">    SceneController sceneController;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">Start</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        sceneController = SSDirector.GetInstance().CurrentSceneController <span class="keyword">as</span> SceneController;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">OnTriggerEnter</span>(<span class="params">Collider collider</span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        <span class="comment">//标记玩家进入自己的区域</span></span><br><span class="line">        <span class="keyword">if</span> (collider.gameObject.name == <span class="string">"player"</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            Debug.Log(<span class="string">"player enter floor "</span> + sign);</span><br><span class="line">            sceneController.floorNumber = sign;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="玩家与金币碰撞"><a href="#玩家与金币碰撞" class="headerlink" title="玩家与金币碰撞"></a>玩家与金币碰撞</h5><p>为金币添加以下脚本，与玩家碰撞后设为不可见，并发布金币减少的消息。</p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">CoinCollide</span> : <span class="title">MonoBehaviour</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">OnTriggerEnter</span>(<span class="params">Collider collider</span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        <span class="comment">//玩家吃到金币事件触发</span></span><br><span class="line">        <span class="keyword">if</span> (collider.gameObject.name == <span class="string">"player"</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="keyword">this</span>.gameObject.SetActive(<span class="literal">false</span>);</span><br><span class="line">            Singleton&lt;GameEventManager&gt;.Instance.RecudeCoinNum();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="玩家与巡逻兵碰撞"><a href="#玩家与巡逻兵碰撞" class="headerlink" title="玩家与巡逻兵碰撞"></a>玩家与巡逻兵碰撞</h5><p>为巡逻兵添加以下脚本，当巡逻兵与玩家相撞后，设置两者的动作，并发布玩家被捕的消息。</p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">PatrolCollide</span> : <span class="title">MonoBehaviour</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">OnCollisionStay</span>(<span class="params">Collision other</span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        <span class="comment">//当侦察兵与玩家相撞</span></span><br><span class="line">        <span class="keyword">if</span> (other.gameObject.name == <span class="string">"player"</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            other.gameObject.GetComponent&lt;Animator&gt;().SetBool(<span class="string">"death"</span>, <span class="literal">true</span>);</span><br><span class="line">            <span class="keyword">this</span>.GetComponent&lt;Animator&gt;().SetBool(<span class="string">"shoot"</span>, <span class="literal">true</span>);</span><br><span class="line">            Singleton&lt;GameEventManager&gt;.Instance.PlayerArrested();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="订阅与发布模式实现"><a href="#订阅与发布模式实现" class="headerlink" title="订阅与发布模式实现"></a>订阅与发布模式实现</h4><h5 id="发布者"><a href="#发布者" class="headerlink" title="发布者"></a>发布者</h5><p>发布者类共定义了三种消息类型：分数改变、游戏结束和硬币被玩家拾取。</p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">GameEventManager</span> : <span class="title">MonoBehaviour</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">delegate</span> <span class="keyword">void</span> <span class="title">ScoreEvent</span>(<span class="params"></span>)</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">event</span> ScoreEvent ScoreChange;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">delegate</span> <span class="keyword">void</span> <span class="title">GameOverEvent</span>(<span class="params"></span>)</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">event</span> GameOverEvent GameOver;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">delegate</span> <span class="keyword">void</span> <span class="title">CoinEvent</span>(<span class="params"></span>)</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">event</span> CoinEvent CoinNumberChange;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//玩家逃脱</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">PlayerEscape</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        <span class="keyword">if</span> (ScoreChange != <span class="literal">null</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            ScoreChange();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//玩家被捕</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">PlayerArrested</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        <span class="keyword">if</span> (GameOver != <span class="literal">null</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            GameOver();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">RecudeCoinNum</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        <span class="keyword">if</span>(CoinNumberChange != <span class="literal">null</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            CoinNumberChange();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">TimeOut</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        <span class="keyword">if</span> (GameOver != <span class="literal">null</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            GameOver();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="订阅者"><a href="#订阅者" class="headerlink" title="订阅者"></a>订阅者</h5><p>订阅者为场景控制器，实现的相关函数如下：</p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">OnEnable</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">//注册事件</span></span><br><span class="line">    GameEventManager.ScoreChange += AddScore;</span><br><span class="line">    GameEventManager.GameOver += GameOver;</span><br><span class="line">    GameEventManager.CoinNumberChange += ReduceCoinNumber;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">OnDisable</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">//取消注册事件</span></span><br><span class="line">    GameEventManager.ScoreChange -= AddScore;</span><br><span class="line">    GameEventManager.GameOver -= GameOver;</span><br><span class="line">    GameEventManager.CoinNumberChange -= ReduceCoinNumber;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">AddScore</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    scoreRecorder.AddScore();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">GameOver</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    gameOver = <span class="literal">true</span>;</span><br><span class="line">    actionManager.DestroyAll();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">ReduceCoinNumber</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    coinNumberGet += <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="附加功能"><a href="#附加功能" class="headerlink" title="附加功能"></a>附加功能</h4><h5 id="金币"><a href="#金币" class="headerlink" title="金币"></a>金币</h5><p>金币是玩家获得游戏胜利的条件，需要拾起地上所有的金币才能结束游戏。</p>
+<h6 id="金币工厂"><a href="#金币工厂" class="headerlink" title="金币工厂"></a>金币工厂</h6><p>金币也通过工厂模式生成，按照预定位置生成固定数量的金币。玩家每次与金币发生碰撞就把金币设为不可见即可，同时在重新开始游戏时全部设置成可见，这样金币就得到了复用，不需要重新生成新的。</p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">CoinFactory</span> : <span class="title">MonoBehaviour</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">private</span> GameObject coinPrefab = <span class="literal">null</span>;</span><br><span class="line">    <span class="keyword">private</span> Vector3[] position = <span class="keyword">new</span> Vector3[<span class="number">6</span>]; <span class="comment">//记录金币的位置</span></span><br><span class="line">    <span class="keyword">private</span> List&lt;GameObject&gt; coins = <span class="keyword">new</span> List&lt;GameObject&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> List&lt;GameObject&gt; <span class="title">GetCoins</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        <span class="keyword">int</span>[] pos_x = &#123;<span class="number">-15</span>, <span class="number">3</span>, <span class="number">13</span>, <span class="number">-7</span>, <span class="number">9</span>&#125;;</span><br><span class="line">        <span class="keyword">int</span>[] pos_z = &#123;<span class="number">-15</span>, <span class="number">-3</span>, <span class="number">-15</span>, <span class="number">15</span>, <span class="number">10</span>&#125;;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            position[i] = <span class="keyword">new</span> Vector3(pos_x[i], <span class="number">1</span>, pos_z[i]);</span><br><span class="line">            coinPrefab = Object.Instantiate(Resources.Load&lt;GameObject&gt;(<span class="string">"Prefabs/Coin"</span>), position[i], Quaternion.identity);</span><br><span class="line">            coinPrefab.name = <span class="string">"coin"</span> + i;</span><br><span class="line">            coins.Add(coinPrefab);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> coins;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">Reset</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; coins.Count; i++)</span><br><span class="line">        &#123;</span><br><span class="line">            coins[i].SetActive(<span class="literal">true</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="倒计时"><a href="#倒计时" class="headerlink" title="倒计时"></a>倒计时</h5><p>为了增加游戏的趣味性，增加了倒计时功能，由<code>TimeManager</code>类实现。当倒计时为0后，游戏结束。</p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">TimeManager</span> : <span class="title">MonoBehaviour</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">float</span> gameTime = <span class="number">90f</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">float</span> timer = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">string</span> timeCounter;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Use this for initialization</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">Start</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">Reset</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        gameTime = <span class="number">90f</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">string</span> <span class="title">GetTimeText</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        <span class="keyword">return</span> timeCounter;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// Update is called once per frame</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">Update</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        <span class="keyword">int</span> M = (<span class="keyword">int</span>)(gameTime / <span class="number">60</span>);</span><br><span class="line">        <span class="keyword">float</span> S = gameTime % <span class="number">60</span>;</span><br><span class="line"></span><br><span class="line">        timer += Time.deltaTime;</span><br><span class="line">        <span class="keyword">if</span> (timer &gt;= <span class="number">1f</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            timer = <span class="number">0</span>;</span><br><span class="line">            gameTime--;</span><br><span class="line">            timeCounter = M.ToString() + <span class="string">":"</span> + <span class="keyword">string</span>.Format(<span class="string">"&#123;0:00&#125;"</span>, S);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (gameTime == <span class="number">0</span>)</span><br><span class="line">        &#123;</span><br><span class="line">            Singleton&lt;GameEventManager&gt;.Instance.TimeOut();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="相机跟随"><a href="#相机跟随" class="headerlink" title="相机跟随"></a>相机跟随</h5><p>相机跟随的实现方式就是让相机在上空与玩家始终保持固定距离，产生相机跟随着玩家移动的效果，增强游戏的真实感。</p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">using</span> System.Collections;</span><br><span class="line"><span class="keyword">using</span> System.Collections.Generic;</span><br><span class="line"><span class="keyword">using</span> UnityEngine;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title">CameraFollow</span> : <span class="title">MonoBehaviour</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">public</span> GameObject player;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">float</span> smothing = <span class="number">5f</span>;</span><br><span class="line">    Vector3 offset;    </span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">Start</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        offset = <span class="keyword">new</span> Vector3(<span class="number">0</span>, <span class="number">25</span>, <span class="number">-20</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">FixedUpdate</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="function"></span>    &#123;</span><br><span class="line">        Vector3 target = player.transform.position + offset;</span><br><span class="line">        transform.position = Vector3.Lerp(transform.position, target, smothing * Time.deltaTime);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="实现结果"><a href="#实现结果" class="headerlink" title="实现结果"></a>实现结果</h4><p>游戏画面如下：</p>
+<img src="/2019/10/24/3D-Game-Programming-Design-模型与动画/game.png">
+
+    </article>
+    <!-- license  -->
+    
+        <div class="license-wrapper">
+            <p>原文作者：<a href="http://yoursite.com">Daniel Xu</a>
+            <p>原文链接：<a href="http://yoursite.com/2019/10/24/3D-Game-Programming-Design-模型与动画/">http://yoursite.com/2019/10/24/3D-Game-Programming-Design-模型与动画/</a>
+            <p>发表日期：<a href="http://yoursite.com/2019/10/24/3D-Game-Programming-Design-模型与动画/">October 24th 2019, 9:10:24 pm</a>
+            <p>更新日期：<a href="http://yoursite.com/2019/10/24/3D-Game-Programming-Design-模型与动画/">February 18th 2020, 10:32:52 pm</a>
+            <p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+                <div class="nextSlogan">Next Post</div>
+                <a href= "/2019/10/29/3D-Game-Programming-Design-粒子系统/" title= "3D-Game-Programming-Design-粒子系统">
+                    <div class="nextTitle">3D-Game-Programming-Design-粒子系统</div>
+                </a>
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href= "/2019/10/17/3D-Game-Programming-Design-物理系统与碰撞/" title= "3D-Game-Programming-Design - 物理系统与碰撞">
+                    <div class="prevTitle">3D-Game-Programming-Design - 物理系统与碰撞</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    <div id="disqus_thread"></div>
+    <script>
+        /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
+        
+        var disqus_config = function () {
+        this.page.url = "http://yoursite.com/2019/10/24/3D-Game-Programming-Design-模型与动画/";  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = "3D-Game-Programming-Design-模型与动画"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        };
+        
+        (function () { // DON'T EDIT BELOW THIS LINE
+            var d = document, s = d.createElement('script');
+            s.src = 'https://danielxus-blog.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+    
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:979223119@qq.com" class="iconfont-archer email" title=email ></a>
+            
+        
+    
+        
+            
+                <a href="//github.com/DanielXuuuuu" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="//juejin.im/user/5db9293ce51d452a0a3afbab" class="iconfont-archer juejin" target="_blank" title=juejin></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+    <div class="busuanzi-container">
+    
+     
+    <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+    
+    </div>
+    
+</footer>
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#智能巡逻兵"><span class="toc-number">1.</span> <span class="toc-text">智能巡逻兵</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#设计要求"><span class="toc-number">1.1.</span> <span class="toc-text">设计要求</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#设计实现"><span class="toc-number">1.2.</span> <span class="toc-text">设计实现</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#巡逻兵"><span class="toc-number">1.2.1.</span> <span class="toc-text">巡逻兵</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#巡逻兵数据"><span class="toc-number">1.2.1.1.</span> <span class="toc-text">巡逻兵数据</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#巡逻兵工厂"><span class="toc-number">1.2.1.2.</span> <span class="toc-text">巡逻兵工厂</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#巡逻兵动作"><span class="toc-number">1.2.1.3.</span> <span class="toc-text">巡逻兵动作</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#巡逻动作"><span class="toc-number">1.2.1.3.1.</span> <span class="toc-text">巡逻动作</span></a></li><li class="toc-item toc-level-6"><a class="toc-link" href="#追踪玩家动作"><span class="toc-number">1.2.1.3.2.</span> <span class="toc-text">追踪玩家动作</span></a></li></ol></li><li class="toc-item toc-level-5"><a class="toc-link" href="#巡逻兵动作管理器"><span class="toc-number">1.2.1.4.</span> <span class="toc-text">巡逻兵动作管理器</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#玩家"><span class="toc-number">1.2.2.</span> <span class="toc-text">玩家</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#玩家移动"><span class="toc-number">1.2.2.1.</span> <span class="toc-text">玩家移动</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#碰撞事件"><span class="toc-number">1.2.3.</span> <span class="toc-text">碰撞事件</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#玩家与地图碰撞"><span class="toc-number">1.2.3.1.</span> <span class="toc-text">玩家与地图碰撞</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#玩家与金币碰撞"><span class="toc-number">1.2.3.2.</span> <span class="toc-text">玩家与金币碰撞</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#玩家与巡逻兵碰撞"><span class="toc-number">1.2.3.3.</span> <span class="toc-text">玩家与巡逻兵碰撞</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#订阅与发布模式实现"><span class="toc-number">1.2.4.</span> <span class="toc-text">订阅与发布模式实现</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#发布者"><span class="toc-number">1.2.4.1.</span> <span class="toc-text">发布者</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#订阅者"><span class="toc-number">1.2.4.2.</span> <span class="toc-text">订阅者</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#附加功能"><span class="toc-number">1.2.5.</span> <span class="toc-text">附加功能</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#金币"><span class="toc-number">1.2.5.1.</span> <span class="toc-text">金币</span></a><ol class="toc-child"><li class="toc-item toc-level-6"><a class="toc-link" href="#金币工厂"><span class="toc-number">1.2.5.1.1.</span> <span class="toc-text">金币工厂</span></a></li></ol></li><li class="toc-item toc-level-5"><a class="toc-link" href="#倒计时"><span class="toc-number">1.2.5.2.</span> <span class="toc-text">倒计时</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#相机跟随"><span class="toc-number">1.2.5.3.</span> <span class="toc-text">相机跟随</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#实现结果"><span class="toc-number">1.2.6.</span> <span class="toc-text">实现结果</span></a></li></ol></li></ol></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 22
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2019 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/29</span><a class="archive-post-title" href= "/2019/12/29/CSS布局学习-｜-两列等高布局/" >CSS布局学习｜两列等高布局</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/16</span><a class="archive-post-title" href= "/2019/12/16/3D-Game-Programming-Design-AR小游戏/" >3D-Game-Programming-Design | AR小游戏</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/14</span><a class="archive-post-title" href= "/2019/12/14/Sevice-Computing-初识Docker/" >Sevice-Computing | 初识Docker</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/01</span><a class="archive-post-title" href= "/2019/12/01/3D-Game-Programming-Design-游戏智能/" >3D Game Programming & Design - 游戏智能</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/26</span><a class="archive-post-title" href= "/2019/11/26/《Javascript高级程序设计》学习-闭包/" >《Javascript高级程序设计》学习 | 闭包</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/24</span><a class="archive-post-title" href= "/2019/11/24/CSS布局学习-圣杯、双飞翼布局/" >CSS布局学习 | 圣杯、双飞翼布局</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/22</span><a class="archive-post-title" href= "/2019/11/22/《Javascript高级程序设计》学习-对象、原型/" >《Javascript高级程序设计》学习 | 对象、原型</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/19</span><a class="archive-post-title" href= "/2019/11/19/《Javascript高级程序设计》学习-函数、变量、作用域/" >《Javascript高级程序设计》学习 | 函数、变量、作用域</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/18</span><a class="archive-post-title" href= "/2019/11/18/MD5算法的C语言实现/" >MD5算法的C语言实现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/17</span><a class="archive-post-title" href= "/2019/11/17/3D-Game-Programming-Design-UI系统/" >3D-Game-Programming-Design-UI系统</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/29</span><a class="archive-post-title" href= "/2019/10/29/3D-Game-Programming-Design-粒子系统/" >3D-Game-Programming-Design-粒子系统</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/24</span><a class="archive-post-title" href= "/2019/10/24/3D-Game-Programming-Design-模型与动画/" >3D-Game-Programming-Design-模型与动画</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/17</span><a class="archive-post-title" href= "/2019/10/17/3D-Game-Programming-Design-物理系统与碰撞/" >3D-Game-Programming-Design - 物理系统与碰撞</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/15</span><a class="archive-post-title" href= "/2019/10/15/浅谈PoW（Proof-of-Work）共识机制/" >浅谈PoW（Proof of Work）共识机制</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/06</span><a class="archive-post-title" href= "/2019/10/06/3D-Game-Programming-Design-与游戏世界交互/" >3D-Game-Programming-Design-与游戏世界交互</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/22</span><a class="archive-post-title" href= "/2019/09/22/3D-Game-Programming-Design-游戏对象与图形基础/" >3D-Game-Programming-Design-游戏对象与图形基础</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/16</span><a class="archive-post-title" href= "/2019/09/16/3D-Game-Programming-Design-空间与运动/" >3D Game Programming & Design - 空间与运动</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span><a class="archive-post-title" href= "/2019/09/12/初次接触Go语言/" >初次接触Go语言</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/10</span><a class="archive-post-title" href= "/2019/09/10/Sevice-Computing-在Linux中安装配置Go开发环境/" >Sevice Computing - 在Linux中安装配置Go开发环境</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/04</span><a class="archive-post-title" href= "/2019/09/04/3D-Game-Programming-Design-离散仿真引擎基础/" >3D Game Programming & Design - 离散仿真引擎基础</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/01</span><a class="archive-post-title" href= "/2019/09/01/Human Resource Machine - 一款杂糅了编程元素的另类解谜游戏/" >Human Resource Machine - 一款杂糅了编程元素的另类解谜游戏</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/01</span><a class="archive-post-title" href= "/2019/09/01/Sevice-Computing-Windows环境下使用VirtualBox搭建云桌面/" >Sevice Computing - Windows环境下使用VirtualBox搭建云桌面</a>
+        </li>
+    
+    </div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="课程作业"><span class="iconfont-archer">&#xe606;</span>课程作业</span>
+    
+        <span class="sidebar-tag-name" data-tags="Unity"><span class="iconfont-archer">&#xe606;</span>Unity</span>
+    
+        <span class="sidebar-tag-name" data-tags="CSS"><span class="iconfont-archer">&#xe606;</span>CSS</span>
+    
+        <span class="sidebar-tag-name" data-tags="前端"><span class="iconfont-archer">&#xe606;</span>前端</span>
+    
+        <span class="sidebar-tag-name" data-tags="编程游戏"><span class="iconfont-archer">&#xe606;</span>编程游戏</span>
+    
+        <span class="sidebar-tag-name" data-tags="解谜"><span class="iconfont-archer">&#xe606;</span>解谜</span>
+    
+        <span class="sidebar-tag-name" data-tags="MD5"><span class="iconfont-archer">&#xe606;</span>MD5</span>
+    
+        <span class="sidebar-tag-name" data-tags="c"><span class="iconfont-archer">&#xe606;</span>c</span>
+    
+        <span class="sidebar-tag-name" data-tags="云桌面"><span class="iconfont-archer">&#xe606;</span>云桌面</span>
+    
+        <span class="sidebar-tag-name" data-tags="服务计算"><span class="iconfont-archer">&#xe606;</span>服务计算</span>
+    
+        <span class="sidebar-tag-name" data-tags="CentOS"><span class="iconfont-archer">&#xe606;</span>CentOS</span>
+    
+        <span class="sidebar-tag-name" data-tags="ssh"><span class="iconfont-archer">&#xe606;</span>ssh</span>
+    
+        <span class="sidebar-tag-name" data-tags="Docker"><span class="iconfont-archer">&#xe606;</span>Docker</span>
+    
+        <span class="sidebar-tag-name" data-tags="Go语言"><span class="iconfont-archer">&#xe606;</span>Go语言</span>
+    
+        <span class="sidebar-tag-name" data-tags="Javascript"><span class="iconfont-archer">&#xe606;</span>Javascript</span>
+    
+        <span class="sidebar-tag-name" data-tags="PoW共识机制"><span class="iconfont-archer">&#xe606;</span>PoW共识机制</span>
+    
+        <span class="sidebar-tag-name" data-tags="区块链"><span class="iconfont-archer">&#xe606;</span>区块链</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br/>
+    1、请确保node版本大于6.2<br/>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br/>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br/>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+        <span class="sidebar-category-name" data-categories="3D游戏编程"><span class="iconfont-archer">&#xe60a;</span>3D游戏编程</span>
+    
+        <span class="sidebar-category-name" data-categories="CSS学习笔记"><span class="iconfont-archer">&#xe60a;</span>CSS学习笔记</span>
+    
+        <span class="sidebar-category-name" data-categories="信息安全"><span class="iconfont-archer">&#xe60a;</span>信息安全</span>
+    
+        <span class="sidebar-category-name" data-categories="服务计算"><span class="iconfont-archer">&#xe60a;</span>服务计算</span>
+    
+        <span class="sidebar-category-name" data-categories="Javascript学习笔记"><span class="iconfont-archer">&#xe60a;</span>Javascript学习笔记</span>
+    
+        <span class="sidebar-category-name" data-categories="区块链"><span class="iconfont-archer">&#xe60a;</span>区块链</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "Daniel Xu"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+    <!-- busuanzi  -->
+    
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    </body>
+</html>
+
+

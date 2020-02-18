@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <!-- title -->
+
+
+
+
+<!-- keywords -->
+
+
+
+
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="Daniel Xu">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Daniel Xu">
+    
+    <meta name="keywords" content="front-end,study,blog">
+    
+    <meta name="description" content="Think twice, code once.">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>MD5算法的C语言实现 · Daniel&#39;s Studio</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href="/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="stylesheet" href="/css/mobile.css?v=20180824" media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href="/assets/favicon.ico">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+    <!-- fancybox -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+</head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >Daniel&#39;s Studio.</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">MD5算法的C语言实现</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href=/>Daniel's Studio.</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style="
+
+
+
+
+
+
+
+height:50vh;
+">
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            MD5算法的C语言实现
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class= post-intro-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "课程作业">课程作业</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "MD5">MD5</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "c">c</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">3.2k</span>阅读时长: <span class="post-count reading-time">13 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2019/11/18</span>
+                    
+                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                        <span class="iconfont-archer">&#xe602;</span>
+                        <span id="busuanzi_value_page_pv"></span>
+                    </span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <h3 id="算法原理概述"><a href="#算法原理概述" class="headerlink" title="算法原理概述"></a>算法原理概述</h3><p>MD5信息摘要算法，( Message-Digest Algorithm 5)，是一种被广泛使用的密码散列函数，可以产生出一个128位（16字节）的散列值，用于确保信息传输完整一致。</p>
+<a id="more"></a>
+
+<p>MD5算法使用little-endian（小端模式，即低位字节存在内存低地址），输入任意不定长度信息，算法都首先将其以512-bit进行分组（不足补位），每个512-bit的分组都和四个32-bit的数据一起，进行4次大循环（共64次迭代），并更新这四个32-bit数据。当所有分组都经过上述操作后，最后得到的四个32-bit联合输出固定的128位信息摘要。</p>
+<h4 id="算法基本流程"><a href="#算法基本流程" class="headerlink" title="算法基本流程"></a>算法基本流程</h4><p>算法的基本过程为：填充、分块、缓冲区初始化、循环压缩、得出结果。 </p>
+<img src="/2019/11/18/MD5算法的C语言实现/total.png">
+
+<h3 id="总体结构"><a href="#总体结构" class="headerlink" title="总体结构"></a>总体结构</h3><p>MD5算法的总体结构如上图所示，结构应该还算是比较清晰的。与上次的DES加密算法不同，MD5的主体只有一个压缩函数，我们只需要写好这个函数中的内容，其他都比较简单。</p>
+<p>我认为最主要的关键点有两个：</p>
+<ul>
+<li>如何对于数据的填充和分块，特别是当输入是以一个文件而不是一个短字符串的形式时；</li>
+<li>如何进行算法中的64次迭代。</li>
+</ul>
+<p>下面对于算法的流程进行一些简单的说明：</p>
+<h4 id="数据填充和分块"><a href="#数据填充和分块" class="headerlink" title="数据填充和分块"></a>数据填充和分块</h4><p>在长度为 K-bit 的原始消息数据尾部填充长度为 P-bit 的标识 100…0（一位1后面接若干位0），1 &lt; P &lt; 512（即至少要填充1个bit），使得填充后的消息位数为：K + P $\equiv$ 448 (mod 512).  <strong>其中，如果当 K $\equiv$448 (mod 512)  时，需要P = 512。</strong></p>
+<p>再向上述填充好的消息尾部附加 K 值的低64位(即K mod $2^{64}$)， 最后得到一个总长度位数为K + P+ 64 $\equiv$ 0 (mod 512) 的消息。 </p>
+<p>得到填充完毕后的消息以后，我们就可以将其恰好分为 L 个 512-bit 的分组。（同时每个分组也可以再细分成16个 32-bit 的小分组，在程序中我们可以使用一个数组保存起来，这在后续的压缩循环中会使用到）</p>
+<h4 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h4><p>初始化一个128-bit 的 MD 缓冲区，初始记为CV0，可以表示成4个32-bit 寄存器（A, B, C, D），后续的迭代始终在 MD 缓冲区进行，最后一步的128-bit 输出即为MD5算法的结果。</p>
+<p>CV0的初始值为IV。寄存器(A, B, C, D) 置16进制初值作为初始向量IV，并采用小端存储(little-endian) 的存储结构（Intel x86系列CPU原本就采用Little Endian 方式存储）：</p>
+<ul>
+<li>A= 0x67452301 </li>
+<li>B= 0xEFCDAB89</li>
+<li>C= 0x98BADCFE </li>
+<li>D= 0x10325476</li>
+</ul>
+<h4 id="压缩循环"><a href="#压缩循环" class="headerlink" title="压缩循环"></a>压缩循环</h4><p>经过上述初始化步骤后，就可以开始执行算法的总体部分了，也就是压缩函数。</p>
+<p>压缩函数每次都从CV（即上文提到的 128-bit 缓冲区）输入128位，从之前分好的消息分组中按顺序输入512位，完成4轮循环后，得到该轮压缩的128位结果，加到原来的缓冲区中，然后用下一分组继续上述步骤。（<strong>说具体一点，就是函数每次都从缓冲区(A, B, C, D)拿到四个数a, b, c, d，然后对于a, b, c, d进行压缩循环操作，把最后得到的结果a, b, c, d加到原来的(A, B, C, D)中，下一次函数执行再从(A, B, C, D)中拿数据</strong>）</p>
+<p>上文提到函数共4轮循环，其中每轮循环分别固定不同的生成函数F, G, H, I，结合指定的T表元素T[]和消息分组的不同部分X[]做16次迭代运算， 生成下一轮循环的输入。即<strong>4轮循环共有64次迭代运算</strong>。每轮的逻辑如下：</p>
+<img src="/2019/11/18/MD5算法的C语言实现/h.png">
+
+<h5 id="生成函数g"><a href="#生成函数g" class="headerlink" title="生成函数g"></a>生成函数<code>g</code></h5><img src="/2019/11/18/MD5算法的C语言实现/g.png">
+
+<h5 id="X-k"><a href="#X-k" class="headerlink" title="X[k]"></a>X[k]</h5><p>定义为当前处理消息分组的第k个(k= 0..15) 32位字（上文曾提到要将512-bit的分组再分为16个 32-bit 的小分组）。</p>
+<p>k值的选取，设 j = i - 1：</p>
+<ul>
+<li>第1轮循环：k = j，即顺序使用X[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15] </li>
+<li>第2轮循环：k = (1 + 5j) mod 16，即顺序使用X[1, 6, 11, 0, 5, 10, 15, 4, 9, 14, 3, 8, 13, 2, 7, 12] </li>
+<li>第3轮循环：k = (5 + 3j) mod 16，即顺序使用X[5, 8, 11, 14, 1, 4, 7, 10, 13, 0, 3, 6, 9, 12, 15, 2] </li>
+<li>第4轮循环：k= 7j mod 16，即顺序使用X[0, 7, 14, 5, 12, 3, 10, 1, 8, 15, 6, 13, 4, 11, 2, 9]</li>
+</ul>
+<h5 id="T-i"><a href="#T-i" class="headerlink" title="T[i]"></a>T[i]</h5><p>T 表的第i个元素，每个元素为32位字；T表总共有64个元素，也称为加法常数。具体数值由于篇幅限制不再列出，具体可见程序。</p>
+<h5 id="CLS-s"><a href="#CLS-s" class="headerlink" title="CLS(s)"></a>CLS(s)</h5><p>循环左移s位。64次迭代中，每一次迭代左移的位数s如下：</p>
+<ul>
+<li>s[ 1..16] = { 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22, 7, 12, 17, 22 } </li>
+<li>s[17..32] = { 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20, 5, 9, 14, 20 } </li>
+<li>s[33..48] = { 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23, 4, 11, 16, 23 } </li>
+<li>s[49..64] = { 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21, 6, 10, 15, 21 }</li>
+</ul>
+<h5 id="加法"><a href="#加法" class="headerlink" title="加法"></a>加法</h5><p>循环中的加号表示的是模$2^{32}$ 加法。</p>
+<h3 id="模块分解"><a href="#模块分解" class="headerlink" title="模块分解"></a>模块分解</h3><p>按照算法的流程以及实际程序编写的需要，总体上我们可以分解得到以下模块：</p>
+<h4 id="读取文件和补位模块"><a href="#读取文件和补位模块" class="headerlink" title="读取文件和补位模块"></a>读取文件和补位模块</h4><p>为了更贴合实际情况，本程序实现对于文本文件中内容的散列值计算，即可以支持任意位数字符。</p>
+<p>我们无需按照死板的思维，一开始就马上统计文件所包含的比特数，然后马上计算出该如何如何进行补位。实际上，正是由于文件指针的存在，使得我们可以对于整个文件进行实时处理，也就是说我们只需要维护一个count变量，其初始值等于0。而我们每次读取文件64个字节（8*64=512），然后对于读到的这个消息分组即时进行压缩，同时累计位数到count上，直到我们读到文件的末尾，意味着此时不足512字节了。注意，由于我们一直在统计读到的位数，那么此时我们就得到了文件总大小，然后就可以对于最后的不足512bit的部分进行相应的补位操作了。</p>
+<p>本文对应的程序就使用了上述方法。</p>
+<h4 id="主循环模块"><a href="#主循环模块" class="headerlink" title="主循环模块"></a>主循环模块</h4><p>主循环就是上文提到的压缩循环部分，输入为文件读取模块得到的512bit文本数据和上一轮循环得到的CV值(A, B, C, D)，经过64次迭代后更新CV值，用于下一次新的循环。最终，随着文本读取的结束，也就得到了最终结果。</p>
+<h4 id="输入输出模块"><a href="#输入输出模块" class="headerlink" title="输入输出模块"></a>输入输出模块</h4><p>输入输出模块就比较简单了，由用户输入要进行处理的文件，最后输出得到的结果（32个16进制数的形式）。</p>
+<h3 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h3><p>本程序中没有使用到特殊的数据结构。只需要对于算法中会使用到的一些表和运算进行预先记录，可方便后续的操作，例如前文提到的生成函数、T表、循环左移的s值等等。</p>
+<h3 id="C语言源代码"><a href="#C语言源代码" class="headerlink" title="C语言源代码"></a>C语言源代码</h3><p>注释已经比较详细，这里不再进行说明。</p>
+<h4 id="md5-h"><a href="#md5-h" class="headerlink" title="md5.h"></a>md5.h</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> _CRT_SECURE_NO_WARNINGS</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifndef</span> MD5_H</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> MD5_H</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdint.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// MD5压缩函数4轮循环中使用的生成函数，每轮不同</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> F(b, c, d) (((b) &amp; (c)) | ((~b) &amp; (d)))</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> G(b, c, d) (((b) &amp; (d)) | ((c) &amp; (~d)))</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> H(b, c, d) ((b) ^ (c) ^ (d))</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> I(b, c, d) ((c) ^ ((b) | (~d)))</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 循环左移</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> LEFTROTATE(num, n) (((num) <span class="meta-string">&lt;&lt; n) | ((num &gt;&gt; (32 - n))))</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// T表，32位字，一共有64个元素，对应64次迭代，也成为加法常数</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">uint32_t</span> T[<span class="number">64</span>] = &#123; <span class="number">0xd76aa478</span>, <span class="number">0xe8c7b756</span>, <span class="number">0x242070db</span>, <span class="number">0xc1bdceee</span>,</span><br><span class="line">						<span class="number">0xf57c0faf</span>, <span class="number">0x4787c62a</span>, <span class="number">0xa8304613</span>, <span class="number">0xfd469501</span>,</span><br><span class="line">						<span class="number">0x698098d8</span>, <span class="number">0x8b44f7af</span>, <span class="number">0xffff5bb1</span>, <span class="number">0x895cd7be</span>,</span><br><span class="line">						<span class="number">0x6b901122</span>, <span class="number">0xfd987193</span>, <span class="number">0xa679438e</span>, <span class="number">0x49b40821</span>,</span><br><span class="line">						<span class="number">0xf61e2562</span>, <span class="number">0xc040b340</span>, <span class="number">0x265e5a51</span>, <span class="number">0xe9b6c7aa</span>,</span><br><span class="line">						<span class="number">0xd62f105d</span>, <span class="number">0x02441453</span>, <span class="number">0xd8a1e681</span>, <span class="number">0xe7d3fbc8</span>,</span><br><span class="line">						<span class="number">0x21e1cde6</span>, <span class="number">0xc33707d6</span>, <span class="number">0xf4d50d87</span>, <span class="number">0x455a14ed</span>,</span><br><span class="line">						<span class="number">0xa9e3e905</span>, <span class="number">0xfcefa3f8</span>, <span class="number">0x676f02d9</span>, <span class="number">0x8d2a4c8a</span>,</span><br><span class="line">						<span class="number">0xfffa3942</span>, <span class="number">0x8771f681</span>, <span class="number">0x6d9d6122</span>, <span class="number">0xfde5380c</span>,</span><br><span class="line">						<span class="number">0xa4beea44</span>, <span class="number">0x4bdecfa9</span>, <span class="number">0xf6bb4b60</span>, <span class="number">0xbebfbc70</span>,</span><br><span class="line">						<span class="number">0x289b7ec6</span>, <span class="number">0xeaa127fa</span>, <span class="number">0xd4ef3085</span>, <span class="number">0x04881d05</span>,</span><br><span class="line">						<span class="number">0xd9d4d039</span>, <span class="number">0xe6db99e5</span>, <span class="number">0x1fa27cf8</span>, <span class="number">0xc4ac5665</span>,</span><br><span class="line">						<span class="number">0xf4292244</span>, <span class="number">0x432aff97</span>, <span class="number">0xab9423a7</span>, <span class="number">0xfc93a039</span>,</span><br><span class="line">						<span class="number">0x655b59c3</span>, <span class="number">0x8f0ccc92</span>, <span class="number">0xffeff47d</span>, <span class="number">0x85845dd1</span>,</span><br><span class="line">						<span class="number">0x6fa87e4f</span>, <span class="number">0xfe2ce6e0</span>, <span class="number">0xa3014314</span>, <span class="number">0x4e0811a1</span>,</span><br><span class="line">						<span class="number">0xf7537e82</span>, <span class="number">0xbd3af235</span>, <span class="number">0x2ad7d2bb</span>, <span class="number">0xeb86d391</span> &#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 64次迭代运算采用的左循环移位的s值</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">uint32_t</span> S[<span class="number">64</span>] = &#123; <span class="number">7</span>, <span class="number">12</span>, <span class="number">17</span>, <span class="number">22</span>, <span class="number">7</span>, <span class="number">12</span>, <span class="number">17</span>, <span class="number">22</span>, <span class="number">7</span>, <span class="number">12</span>, <span class="number">17</span>, <span class="number">22</span>, <span class="number">7</span>, <span class="number">12</span>, <span class="number">17</span>, <span class="number">22</span>,</span><br><span class="line">						 <span class="number">5</span>,  <span class="number">9</span>, <span class="number">14</span>, <span class="number">20</span>, <span class="number">5</span>,  <span class="number">9</span>, <span class="number">14</span>, <span class="number">20</span>, <span class="number">5</span>,  <span class="number">9</span>, <span class="number">14</span>, <span class="number">20</span>, <span class="number">5</span>,  <span class="number">9</span>, <span class="number">14</span>, <span class="number">20</span>,</span><br><span class="line">						 <span class="number">4</span>, <span class="number">11</span>, <span class="number">16</span>, <span class="number">23</span>, <span class="number">4</span>, <span class="number">11</span>, <span class="number">16</span>, <span class="number">23</span>, <span class="number">4</span>, <span class="number">11</span>, <span class="number">16</span>, <span class="number">23</span>, <span class="number">4</span>, <span class="number">11</span>, <span class="number">16</span>, <span class="number">23</span>,</span><br><span class="line">						 <span class="number">6</span>, <span class="number">10</span>, <span class="number">15</span>, <span class="number">21</span>, <span class="number">6</span>, <span class="number">10</span>, <span class="number">15</span>, <span class="number">21</span>, <span class="number">6</span>, <span class="number">10</span>, <span class="number">15</span>, <span class="number">21</span>, <span class="number">6</span>, <span class="number">10</span>, <span class="number">15</span>, <span class="number">21</span> &#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 两个工具函数</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">int2byte</span><span class="params">(<span class="keyword">uint32_t</span> val, <span class="keyword">uint8_t</span> *bytes)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	bytes[<span class="number">0</span>] = (<span class="keyword">uint8_t</span>)val;</span><br><span class="line">	bytes[<span class="number">1</span>] = (<span class="keyword">uint8_t</span>)(val &gt;&gt; <span class="number">8</span>);</span><br><span class="line">	bytes[<span class="number">2</span>] = (<span class="keyword">uint8_t</span>)(val &gt;&gt; <span class="number">16</span>);</span><br><span class="line">	bytes[<span class="number">3</span>] = (<span class="keyword">uint8_t</span>)(val &gt;&gt; <span class="number">24</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">uint32_t</span> byte2int(<span class="keyword">const</span> <span class="keyword">uint8_t</span> *bytes)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">return</span> (<span class="keyword">uint32_t</span>)bytes[<span class="number">0</span>]</span><br><span class="line">		| ((<span class="keyword">uint32_t</span>)bytes[<span class="number">1</span>] &lt;&lt; <span class="number">8</span>)</span><br><span class="line">		| ((<span class="keyword">uint32_t</span>)bytes[<span class="number">2</span>] &lt;&lt; <span class="number">16</span>)</span><br><span class="line">		| ((<span class="keyword">uint32_t</span>)bytes[<span class="number">3</span>] &lt;&lt; <span class="number">24</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// MD5主函数</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">MD5</span><span class="params">(<span class="keyword">const</span> <span class="keyword">uint8_t</span>* filepath, <span class="keyword">uint8_t</span> *result)</span> </span>&#123;</span><br><span class="line">	FILE *fp = <span class="literal">NULL</span>;</span><br><span class="line">	<span class="keyword">uint8_t</span> <span class="built_in">buffer</span>[<span class="number">64</span>];</span><br><span class="line">	<span class="keyword">uint8_t</span>* temp = <span class="literal">NULL</span>;</span><br><span class="line">	<span class="keyword">size_t</span> count = <span class="number">0</span>, offset, i; <span class="comment">// count用于记录总长度，补位的时候需要用到</span></span><br><span class="line">	<span class="keyword">uint32_t</span> X[<span class="number">16</span>];</span><br><span class="line">	<span class="keyword">int</span> flag = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> ((fp = fopen(filepath, <span class="string">"rb+"</span>)) == <span class="literal">NULL</span>) &#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"[ERROR] File in %s not found."</span>, filepath);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// MD缓冲区CV，迭代在缓冲区进行</span></span><br><span class="line">	<span class="keyword">uint32_t</span> A, B, C, D;</span><br><span class="line">	<span class="comment">// 初始向量IV，采用小端存储（Intel x86系列原本就采用了Little Endian方式存储）</span></span><br><span class="line">	A = <span class="number">0x67452301</span>;</span><br><span class="line">	B = <span class="number">0xEFCDAB89</span>;</span><br><span class="line">	C = <span class="number">0x98BADCFE</span>;</span><br><span class="line">	D = <span class="number">0X10325476</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">while</span> (!feof(fp)) &#123;</span><br><span class="line">		<span class="built_in">memset</span>(<span class="built_in">buffer</span>, <span class="number">0</span>, <span class="keyword">sizeof</span>(<span class="built_in">buffer</span>));</span><br><span class="line">		<span class="comment">// fread函数返回读取的次数，设定每次读取一个字符，就可以知道字符长度了</span></span><br><span class="line">		<span class="keyword">int</span> len = fread(<span class="built_in">buffer</span>, <span class="number">1</span>, <span class="number">64</span>, fp);</span><br><span class="line">		<span class="comment">// 更新文件总长度</span></span><br><span class="line">		count += len;</span><br><span class="line">		<span class="comment">// 当读取文件到末尾时，意味着需要进行补位操作了，此时读到的len可能不足512bit，也可能刚好等于512bit</span></span><br><span class="line">		<span class="keyword">if</span> (feof(fp)) &#123;</span><br><span class="line">			flag = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">			<span class="comment">// 因为恰好等于448bit不行，所以new_len直接等于len+1</span></span><br><span class="line">			<span class="keyword">int</span> new_len;</span><br><span class="line">			<span class="keyword">for</span> (new_len = len + <span class="number">1</span>; new_len % <span class="number">64</span> != <span class="number">56</span>; new_len++)</span><br><span class="line">				;</span><br><span class="line"></span><br><span class="line">			<span class="comment">// 还要增加64bit</span></span><br><span class="line">			temp = (<span class="keyword">uint8_t</span>*)<span class="built_in">malloc</span>(new_len + <span class="number">8</span>);</span><br><span class="line">			<span class="built_in">memcpy</span>(temp, <span class="built_in">buffer</span>, len);</span><br><span class="line"></span><br><span class="line">			<span class="comment">// 填充1000...0</span></span><br><span class="line">			temp[len] = <span class="number">0x80</span>;</span><br><span class="line">			<span class="keyword">for</span> (offset = len + <span class="number">1</span>; offset &lt; new_len; offset++)</span><br><span class="line">				temp[offset] = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">			<span class="comment">// 在末尾再附加总长度count的低64位，由于这里的count单位是byte，所以要乘以8</span></span><br><span class="line">			int2byte(count * <span class="number">8</span>, temp + new_len);</span><br><span class="line">			int2byte(count &gt;&gt; <span class="number">29</span>, temp + new_len + <span class="number">4</span>); <span class="comment">//参考了其他代码，count&gt;&gt;29相当于count*8&gt;&gt;32，但可以避免值溢出</span></span><br><span class="line">			len = new_len;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 虽然每次只读取512bit，但是还是采用这样的方式，可以防止最后的一次由于补位导致可能出现的 len &gt; 512bit 的情况（此时就要分两次了）</span></span><br><span class="line">		<span class="keyword">for</span> (offset = <span class="number">0</span>; offset &lt; len; offset += <span class="number">64</span>) &#123;</span><br><span class="line">			<span class="comment">// 读到结尾时，我们把补位后的数据存在了temp中，为了处理的统一，将temp中的数据保存到buffer上</span></span><br><span class="line">			<span class="keyword">if</span> (flag == <span class="number">1</span>) &#123;</span><br><span class="line">				<span class="built_in">memcpy</span>(<span class="built_in">buffer</span>, temp + offset, <span class="number">64</span>);</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">			<span class="comment">// 保存512位的每32位分组，在X[k]时会用到</span></span><br><span class="line">			<span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">16</span>; i++) &#123;</span><br><span class="line">				X[i] = byte2int(<span class="built_in">buffer</span> + i * <span class="number">4</span>);</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">			<span class="keyword">uint32_t</span> a, b, c, d, temp, g, k;</span><br><span class="line">			a = A;</span><br><span class="line">			b = B;</span><br><span class="line">			c = C;</span><br><span class="line">			d = D;</span><br><span class="line"></span><br><span class="line">			<span class="comment">// 主循环，共四轮，每轮16次迭代，共64次迭代</span></span><br><span class="line">			<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; <span class="number">64</span>; i++) &#123;</span><br><span class="line">				<span class="keyword">if</span> (i &lt; <span class="number">16</span>) &#123;</span><br><span class="line">					g = F(b, c, d);</span><br><span class="line">					k = i;</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">else</span> <span class="keyword">if</span> (i &lt; <span class="number">32</span>) &#123;</span><br><span class="line">					g = G(b, c, d);</span><br><span class="line">					k = (<span class="number">1</span> + <span class="number">5</span> * i) % <span class="number">16</span>;</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">else</span> <span class="keyword">if</span> (i &lt; <span class="number">48</span>) &#123;</span><br><span class="line">					g = H(b, c, d);</span><br><span class="line">					k = (<span class="number">5</span> + <span class="number">3</span> * i) % <span class="number">16</span>;</span><br><span class="line">				&#125;</span><br><span class="line">				<span class="keyword">else</span> &#123;</span><br><span class="line">					g = I(b, c, d);</span><br><span class="line">					k = (<span class="number">7</span> * i) % <span class="number">16</span>;</span><br><span class="line">				&#125;</span><br><span class="line">				temp = d;</span><br><span class="line">				d = c;</span><br><span class="line">				c = b;</span><br><span class="line">				b = b + LEFTROTATE((a + g + X[k] + T[i]), S[i]);</span><br><span class="line">				a = temp;</span><br><span class="line">			&#125;</span><br><span class="line"></span><br><span class="line">			A += a;</span><br><span class="line">			B += b;</span><br><span class="line">			C += c;</span><br><span class="line">			D += d;</span><br><span class="line"></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 文件读取结束，释放内存</span></span><br><span class="line">	<span class="built_in">free</span>(temp);</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 把128位的最终结果转化为字节形式</span></span><br><span class="line">	int2byte(A, result);</span><br><span class="line">	int2byte(B, result + <span class="number">4</span>);</span><br><span class="line">	int2byte(C, result + <span class="number">8</span>);</span><br><span class="line">	int2byte(D, result + <span class="number">12</span>);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span> <span class="comment">// !MD5_H</span></span></span><br></pre></td></tr></table></figure>
+
+<h4 id="main-c"><a href="#main-c" class="headerlink" title="main.c"></a>main.c</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"md5.h"</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"\n================== MD5 Message-Digest Algorithm ==================\n\n"</span>);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">"[INPUT] Enter the filepath: "</span>);</span><br><span class="line">	</span><br><span class="line">	<span class="comment">// 输入文件路径</span></span><br><span class="line">	<span class="keyword">char</span> filepath[<span class="number">256</span>];</span><br><span class="line">	<span class="built_in">scanf</span>(<span class="string">"%s"</span>, filepath);</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 128位结果</span></span><br><span class="line">	<span class="keyword">uint8_t</span> result[<span class="number">16</span>];</span><br><span class="line">	<span class="keyword">int</span> i;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// 返回值不等于1表示有错误</span></span><br><span class="line">	<span class="keyword">if</span> (MD5(filepath, result) == <span class="number">1</span>) &#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"\n[INFO] The result is: "</span>);</span><br><span class="line"></span><br><span class="line">		<span class="comment">//将字节通过无符号十六进制输出</span></span><br><span class="line">		<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; <span class="number">16</span>; i++) &#123;</span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">"%2.2x"</span>, result[i]);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	system(<span class="string">"pause"</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="编译运行结果"><a href="#编译运行结果" class="headerlink" title="编译运行结果"></a>编译运行结果</h3><blockquote>
+<p>运行环境：💻Windows 10 1903</p>
+<p>IDE：Visual Studio 2017</p>
+<p>测试方式：和<a href="https://www.sojson.com/encrypt_md5.html" target="_blank" rel="noopener">网上的已有MD5在线算法</a>得到的结果进行比较，验证正确性。</p>
+<p>注意：在使用本程序时，需要将文件放在正确的路径下</p>
+</blockquote>
+<h4 id="短字符串"><a href="#短字符串" class="headerlink" title="短字符串"></a>短字符串</h4><p>使用短字符<code>Hello World!</code>进行测试：</p>
+<img src="/2019/11/18/MD5算法的C语言实现/test1.png">
+
+<h4 id="长字符串"><a href="#长字符串" class="headerlink" title="长字符串"></a>长字符串</h4><p>使用长达157个字符的字符串进行测试：</p>
+<img src="/2019/11/18/MD5算法的C语言实现/test2.png">
+
+<p>与网上的结果均一致，测试通过。</p>
+
+    </article>
+    <!-- license  -->
+    
+        <div class="license-wrapper">
+            <p>原文作者：<a href="http://yoursite.com">Daniel Xu</a>
+            <p>原文链接：<a href="http://yoursite.com/2019/11/18/MD5算法的C语言实现/">http://yoursite.com/2019/11/18/MD5算法的C语言实现/</a>
+            <p>发表日期：<a href="http://yoursite.com/2019/11/18/MD5算法的C语言实现/">November 18th 2019, 8:08:47 pm</a>
+            <p>更新日期：<a href="http://yoursite.com/2019/11/18/MD5算法的C语言实现/">February 18th 2020, 10:31:44 pm</a>
+            <p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+                <div class="nextSlogan">Next Post</div>
+                <a href= "/2019/11/19/《Javascript高级程序设计》学习-函数、变量、作用域/" title= "《Javascript高级程序设计》学习 | 函数、变量、作用域">
+                    <div class="nextTitle">《Javascript高级程序设计》学习 | 函数、变量、作用域</div>
+                </a>
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href= "/2019/11/17/3D-Game-Programming-Design-UI系统/" title= "3D-Game-Programming-Design-UI系统">
+                    <div class="prevTitle">3D-Game-Programming-Design-UI系统</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    <div id="disqus_thread"></div>
+    <script>
+        /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
+        
+        var disqus_config = function () {
+        this.page.url = "http://yoursite.com/2019/11/18/MD5算法的C语言实现/";  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = "MD5算法的C语言实现"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        };
+        
+        (function () { // DON'T EDIT BELOW THIS LINE
+            var d = document, s = d.createElement('script');
+            s.src = 'https://danielxus-blog.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+    
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:979223119@qq.com" class="iconfont-archer email" title=email ></a>
+            
+        
+    
+        
+            
+                <a href="//github.com/DanielXuuuuu" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="//juejin.im/user/5db9293ce51d452a0a3afbab" class="iconfont-archer juejin" target="_blank" title=juejin></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+    <div class="busuanzi-container">
+    
+     
+    <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+    
+    </div>
+    
+</footer>
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#算法原理概述"><span class="toc-number">1.</span> <span class="toc-text">算法原理概述</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#算法基本流程"><span class="toc-number">1.1.</span> <span class="toc-text">算法基本流程</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#总体结构"><span class="toc-number">2.</span> <span class="toc-text">总体结构</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#数据填充和分块"><span class="toc-number">2.1.</span> <span class="toc-text">数据填充和分块</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#初始化"><span class="toc-number">2.2.</span> <span class="toc-text">初始化</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#压缩循环"><span class="toc-number">2.3.</span> <span class="toc-text">压缩循环</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#生成函数g"><span class="toc-number">2.3.1.</span> <span class="toc-text">生成函数g</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#X-k"><span class="toc-number">2.3.2.</span> <span class="toc-text">X[k]</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#T-i"><span class="toc-number">2.3.3.</span> <span class="toc-text">T[i]</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#CLS-s"><span class="toc-number">2.3.4.</span> <span class="toc-text">CLS(s)</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#加法"><span class="toc-number">2.3.5.</span> <span class="toc-text">加法</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#模块分解"><span class="toc-number">3.</span> <span class="toc-text">模块分解</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#读取文件和补位模块"><span class="toc-number">3.1.</span> <span class="toc-text">读取文件和补位模块</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#主循环模块"><span class="toc-number">3.2.</span> <span class="toc-text">主循环模块</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#输入输出模块"><span class="toc-number">3.3.</span> <span class="toc-text">输入输出模块</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#数据结构"><span class="toc-number">4.</span> <span class="toc-text">数据结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#C语言源代码"><span class="toc-number">5.</span> <span class="toc-text">C语言源代码</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#md5-h"><span class="toc-number">5.1.</span> <span class="toc-text">md5.h</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#main-c"><span class="toc-number">5.2.</span> <span class="toc-text">main.c</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#编译运行结果"><span class="toc-number">6.</span> <span class="toc-text">编译运行结果</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#短字符串"><span class="toc-number">6.1.</span> <span class="toc-text">短字符串</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#长字符串"><span class="toc-number">6.2.</span> <span class="toc-text">长字符串</span></a></li></ol></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 22
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2019 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/29</span><a class="archive-post-title" href= "/2019/12/29/CSS布局学习-｜-两列等高布局/" >CSS布局学习｜两列等高布局</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/16</span><a class="archive-post-title" href= "/2019/12/16/3D-Game-Programming-Design-AR小游戏/" >3D-Game-Programming-Design | AR小游戏</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/14</span><a class="archive-post-title" href= "/2019/12/14/Sevice-Computing-初识Docker/" >Sevice-Computing | 初识Docker</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/01</span><a class="archive-post-title" href= "/2019/12/01/3D-Game-Programming-Design-游戏智能/" >3D Game Programming & Design - 游戏智能</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/26</span><a class="archive-post-title" href= "/2019/11/26/《Javascript高级程序设计》学习-闭包/" >《Javascript高级程序设计》学习 | 闭包</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/24</span><a class="archive-post-title" href= "/2019/11/24/CSS布局学习-圣杯、双飞翼布局/" >CSS布局学习 | 圣杯、双飞翼布局</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/22</span><a class="archive-post-title" href= "/2019/11/22/《Javascript高级程序设计》学习-对象、原型/" >《Javascript高级程序设计》学习 | 对象、原型</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/19</span><a class="archive-post-title" href= "/2019/11/19/《Javascript高级程序设计》学习-函数、变量、作用域/" >《Javascript高级程序设计》学习 | 函数、变量、作用域</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/18</span><a class="archive-post-title" href= "/2019/11/18/MD5算法的C语言实现/" >MD5算法的C语言实现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/17</span><a class="archive-post-title" href= "/2019/11/17/3D-Game-Programming-Design-UI系统/" >3D-Game-Programming-Design-UI系统</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/29</span><a class="archive-post-title" href= "/2019/10/29/3D-Game-Programming-Design-粒子系统/" >3D-Game-Programming-Design-粒子系统</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/24</span><a class="archive-post-title" href= "/2019/10/24/3D-Game-Programming-Design-模型与动画/" >3D-Game-Programming-Design-模型与动画</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/17</span><a class="archive-post-title" href= "/2019/10/17/3D-Game-Programming-Design-物理系统与碰撞/" >3D-Game-Programming-Design - 物理系统与碰撞</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/15</span><a class="archive-post-title" href= "/2019/10/15/浅谈PoW（Proof-of-Work）共识机制/" >浅谈PoW（Proof of Work）共识机制</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/06</span><a class="archive-post-title" href= "/2019/10/06/3D-Game-Programming-Design-与游戏世界交互/" >3D-Game-Programming-Design-与游戏世界交互</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/22</span><a class="archive-post-title" href= "/2019/09/22/3D-Game-Programming-Design-游戏对象与图形基础/" >3D-Game-Programming-Design-游戏对象与图形基础</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/16</span><a class="archive-post-title" href= "/2019/09/16/3D-Game-Programming-Design-空间与运动/" >3D Game Programming & Design - 空间与运动</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span><a class="archive-post-title" href= "/2019/09/12/初次接触Go语言/" >初次接触Go语言</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/10</span><a class="archive-post-title" href= "/2019/09/10/Sevice-Computing-在Linux中安装配置Go开发环境/" >Sevice Computing - 在Linux中安装配置Go开发环境</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/04</span><a class="archive-post-title" href= "/2019/09/04/3D-Game-Programming-Design-离散仿真引擎基础/" >3D Game Programming & Design - 离散仿真引擎基础</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/01</span><a class="archive-post-title" href= "/2019/09/01/Human Resource Machine - 一款杂糅了编程元素的另类解谜游戏/" >Human Resource Machine - 一款杂糅了编程元素的另类解谜游戏</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/01</span><a class="archive-post-title" href= "/2019/09/01/Sevice-Computing-Windows环境下使用VirtualBox搭建云桌面/" >Sevice Computing - Windows环境下使用VirtualBox搭建云桌面</a>
+        </li>
+    
+    </div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="课程作业"><span class="iconfont-archer">&#xe606;</span>课程作业</span>
+    
+        <span class="sidebar-tag-name" data-tags="Unity"><span class="iconfont-archer">&#xe606;</span>Unity</span>
+    
+        <span class="sidebar-tag-name" data-tags="CSS"><span class="iconfont-archer">&#xe606;</span>CSS</span>
+    
+        <span class="sidebar-tag-name" data-tags="前端"><span class="iconfont-archer">&#xe606;</span>前端</span>
+    
+        <span class="sidebar-tag-name" data-tags="编程游戏"><span class="iconfont-archer">&#xe606;</span>编程游戏</span>
+    
+        <span class="sidebar-tag-name" data-tags="解谜"><span class="iconfont-archer">&#xe606;</span>解谜</span>
+    
+        <span class="sidebar-tag-name" data-tags="MD5"><span class="iconfont-archer">&#xe606;</span>MD5</span>
+    
+        <span class="sidebar-tag-name" data-tags="c"><span class="iconfont-archer">&#xe606;</span>c</span>
+    
+        <span class="sidebar-tag-name" data-tags="云桌面"><span class="iconfont-archer">&#xe606;</span>云桌面</span>
+    
+        <span class="sidebar-tag-name" data-tags="服务计算"><span class="iconfont-archer">&#xe606;</span>服务计算</span>
+    
+        <span class="sidebar-tag-name" data-tags="CentOS"><span class="iconfont-archer">&#xe606;</span>CentOS</span>
+    
+        <span class="sidebar-tag-name" data-tags="ssh"><span class="iconfont-archer">&#xe606;</span>ssh</span>
+    
+        <span class="sidebar-tag-name" data-tags="Docker"><span class="iconfont-archer">&#xe606;</span>Docker</span>
+    
+        <span class="sidebar-tag-name" data-tags="Go语言"><span class="iconfont-archer">&#xe606;</span>Go语言</span>
+    
+        <span class="sidebar-tag-name" data-tags="Javascript"><span class="iconfont-archer">&#xe606;</span>Javascript</span>
+    
+        <span class="sidebar-tag-name" data-tags="PoW共识机制"><span class="iconfont-archer">&#xe606;</span>PoW共识机制</span>
+    
+        <span class="sidebar-tag-name" data-tags="区块链"><span class="iconfont-archer">&#xe606;</span>区块链</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br/>
+    1、请确保node版本大于6.2<br/>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br/>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br/>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+        <span class="sidebar-category-name" data-categories="3D游戏编程"><span class="iconfont-archer">&#xe60a;</span>3D游戏编程</span>
+    
+        <span class="sidebar-category-name" data-categories="CSS学习笔记"><span class="iconfont-archer">&#xe60a;</span>CSS学习笔记</span>
+    
+        <span class="sidebar-category-name" data-categories="信息安全"><span class="iconfont-archer">&#xe60a;</span>信息安全</span>
+    
+        <span class="sidebar-category-name" data-categories="服务计算"><span class="iconfont-archer">&#xe60a;</span>服务计算</span>
+    
+        <span class="sidebar-category-name" data-categories="Javascript学习笔记"><span class="iconfont-archer">&#xe60a;</span>Javascript学习笔记</span>
+    
+        <span class="sidebar-category-name" data-categories="区块链"><span class="iconfont-archer">&#xe60a;</span>区块链</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "Daniel Xu"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+    <!-- busuanzi  -->
+    
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    </body>
+</html>
+
+

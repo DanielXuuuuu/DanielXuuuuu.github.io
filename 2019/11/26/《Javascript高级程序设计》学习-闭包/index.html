@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <!-- title -->
+
+
+
+
+<!-- keywords -->
+
+
+
+
+<head><meta name="generator" content="Hexo 3.9.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="author" content="Daniel Xu">
+    <meta name="renderer" content="webkit">
+    <meta name="copyright" content="Daniel Xu">
+    
+    <meta name="keywords" content="front-end,study,blog">
+    
+    <meta name="description" content="Think twice, code once.">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>《Javascript高级程序设计》学习 | 闭包 · Daniel&#39;s Studio</title>
+    <style type="text/css">
+    @font-face {
+        font-family: 'Oswald-Regular';
+        src: url("/font/Oswald-Regular.ttf");
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header,
+    footer,
+    .back-top,
+    .sidebar,
+    .container,
+    .site-intro-meta,
+    .toc-wrapper {
+        display: none;
+    }
+
+    .site-intro {
+        position: relative;
+        z-index: 3;
+        width: 100%;
+        /* height: 50vh; */
+        overflow: hidden;
+    }
+
+    .site-intro-placeholder {
+        position: absolute;
+        z-index: -2;
+        top: 0;
+        left: 0;
+        width: calc(100% + 300px);
+        height: 100%;
+        background: repeating-linear-gradient(-45deg, #444 0, #444 80px, #333 80px, #333 160px);
+        background-position: center center;
+        transform: translate3d(-226px, 0, 0);
+        animation: gradient-move 2.5s ease-out 0s infinite;
+    }
+
+    @keyframes gradient-move {
+        0% {
+            transform: translate3d(-226px, 0, 0);
+        }
+        100% {
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+</style>
+
+    <link rel="preload" href="/css/style.css?v=20180824" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="stylesheet" href="/css/mobile.css?v=20180824" media="(max-width: 980px)">
+    
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    
+    <!-- /*! loadCSS. [c]2017 Filament Group, Inc. MIT License */
+/* This file is meant as a standalone workflow for
+- testing support for link[rel=preload]
+- enabling async CSS loading in browsers that do not support rel=preload
+- applying rel preload css once loaded, whether supported or not.
+*/ -->
+<script>
+(function( w ){
+	"use strict";
+	// rel=preload support test
+	if( !w.loadCSS ){
+		w.loadCSS = function(){};
+	}
+	// define on the loadCSS obj
+	var rp = loadCSS.relpreload = {};
+	// rel=preload feature support test
+	// runs once and returns a function for compat purposes
+	rp.support = (function(){
+		var ret;
+		try {
+			ret = w.document.createElement( "link" ).relList.supports( "preload" );
+		} catch (e) {
+			ret = false;
+		}
+		return function(){
+			return ret;
+		};
+	})();
+
+	// if preload isn't supported, get an asynchronous load by using a non-matching media attribute
+	// then change that media back to its intended value on load
+	rp.bindMediaToggle = function( link ){
+		// remember existing media attr for ultimate state, or default to 'all'
+		var finalMedia = link.media || "all";
+
+		function enableStylesheet(){
+			link.media = finalMedia;
+		}
+
+		// bind load handlers to enable media
+		if( link.addEventListener ){
+			link.addEventListener( "load", enableStylesheet );
+		} else if( link.attachEvent ){
+			link.attachEvent( "onload", enableStylesheet );
+		}
+
+		// Set rel and non-applicable media type to start an async request
+		// note: timeout allows this to happen async to let rendering continue in IE
+		setTimeout(function(){
+			link.rel = "stylesheet";
+			link.media = "only x";
+		});
+		// also enable media after 3 seconds,
+		// which will catch very old browsers (android 2.x, old firefox) that don't support onload on link
+		setTimeout( enableStylesheet, 3000 );
+	};
+
+	// loop through link elements in DOM
+	rp.poly = function(){
+		// double check this to prevent external calls from running
+		if( rp.support() ){
+			return;
+		}
+		var links = w.document.getElementsByTagName( "link" );
+		for( var i = 0; i < links.length; i++ ){
+			var link = links[ i ];
+			// qualify links to those with rel=preload and as=style attrs
+			if( link.rel === "preload" && link.getAttribute( "as" ) === "style" && !link.getAttribute( "data-loadcss" ) ){
+				// prevent rerunning on link
+				link.setAttribute( "data-loadcss", true );
+				// bind listeners to toggle media back
+				rp.bindMediaToggle( link );
+			}
+		}
+	};
+
+	// if unsupported, run the polyfill
+	if( !rp.support() ){
+		// run once at least
+		rp.poly();
+
+		// rerun poly on an interval until onload
+		var run = w.setInterval( rp.poly, 500 );
+		if( w.addEventListener ){
+			w.addEventListener( "load", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		} else if( w.attachEvent ){
+			w.attachEvent( "onload", function(){
+				rp.poly();
+				w.clearInterval( run );
+			} );
+		}
+	}
+
+
+	// commonjs
+	if( typeof exports !== "undefined" ){
+		exports.loadCSS = loadCSS;
+	}
+	else {
+		w.loadCSS = loadCSS;
+	}
+}( typeof global !== "undefined" ? global : this ) );
+</script>
+
+    <link rel="icon" href="/assets/favicon.ico">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js" as="script">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js" as="script">
+    <link rel="preload" href="/scripts/main.js" as="script">
+    <link rel="preload" as="font" href="/font/Oswald-Regular.ttf" crossorigin>
+    <link rel="preload" as="font" href="https://at.alicdn.com/t/font_327081_1dta1rlogw17zaor.woff" crossorigin>
+    
+    <!-- fancybox -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" defer></script>
+    <!-- 百度统计  -->
+    
+    <!-- 谷歌统计  -->
+    
+</head>
+
+    
+        <body class="post-body">
+    
+    
+<header class="header">
+
+    <div class="read-progress"></div>
+    <div class="header-sidebar-menu">&#xe775;</div>
+    <!-- post页的toggle banner  -->
+    
+    <div class="banner">
+            <div class="blog-title">
+                <a href="/" >Daniel&#39;s Studio.</a>
+            </div>
+            <div class="post-title">
+                <a href="#" class="post-name">《Javascript高级程序设计》学习 | 闭包</a>
+            </div>
+    </div>
+    
+    <a class="home-link" href=/>Daniel's Studio.</a>
+</header>
+    <div class="wrapper">
+        <div class="site-intro" style="
+
+
+
+
+
+
+
+height:50vh;
+">
+    
+    <!-- 主页  -->
+    
+    
+    <!-- 404页  -->
+            
+    <div class="site-intro-placeholder"></div>
+    <div class="site-intro-img" style="background-image: url(/intro/post-bg.jpg)"></div>
+    <div class="site-intro-meta">
+        <!-- 标题  -->
+        <h1 class="intro-title">
+            <!-- 主页  -->
+            
+            《Javascript高级程序设计》学习 | 闭包
+            <!-- 404 -->
+            
+        </h1>
+        <!-- 副标题 -->
+        <p class="intro-subtitle">
+            <!-- 主页副标题  -->
+            
+            
+            <!-- 404 -->
+            
+        </p>
+        <!-- 文章页meta -->
+        
+            <div class="post-intros">
+                <!-- 文章页标签  -->
+                
+                    <div class= post-intro-tags >
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "前端">前端</a>
+    
+        <a class="post-tag" href="javascript:void(0);" data-tags = "Javascript">Javascript</a>
+    
+</div>
+                
+                
+                    <div class="post-intro-read">
+                        <span>字数统计: <span class="post-count word-count">3.4k</span>阅读时长: <span class="post-count reading-time">12 min</span></span>
+                    </div>
+                
+                <div class="post-intro-meta">
+                    <span class="post-intro-calander iconfont-archer">&#xe676;</span>
+                    <span class="post-intro-time">2019/11/26</span>
+                    
+                    <span id="busuanzi_container_page_pv" class="busuanzi-pv">
+                        <span class="iconfont-archer">&#xe602;</span>
+                        <span id="busuanzi_value_page_pv"></span>
+                    </span>
+                    
+                    <span class="shareWrapper">
+                        <span class="iconfont-archer shareIcon">&#xe71d;</span>
+                        <span class="shareText">Share</span>
+                        <ul class="shareList">
+                            <li class="iconfont-archer share-qr" data-type="qr">&#xe75b;
+                                <div class="share-qrcode"></div>
+                            </li>
+                            <li class="iconfont-archer" data-type="weibo">&#xe619;</li>
+                            <li class="iconfont-archer" data-type="qzone">&#xe62e;</li>
+                            <li class="iconfont-archer" data-type="twitter">&#xe634;</li>
+                            <li class="iconfont-archer" data-type="facebook">&#xe67a;</li>
+                        </ul>
+                    </span>
+                </div>
+            </div>
+        
+    </div>
+</div>
+        <script>
+ 
+  // get user agent
+  var browser = {
+    versions: function () {
+      var u = window.navigator.userAgent;
+      return {
+        userAgent: u,
+        trident: u.indexOf('Trident') > -1, //IE内核
+        presto: u.indexOf('Presto') > -1, //opera内核
+        webKit: u.indexOf('AppleWebKit') > -1, //苹果、谷歌内核
+        gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, //火狐内核
+        mobile: !!u.match(/AppleWebKit.*Mobile.*/), //是否为移动终端
+        ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), //ios终端
+        android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, //android终端或者uc浏览器
+        iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, //是否为iPhone或者安卓QQ浏览器
+        iPad: u.indexOf('iPad') > -1, //是否为iPad
+        webApp: u.indexOf('Safari') == -1, //是否为web应用程序，没有头部与底部
+        weixin: u.indexOf('MicroMessenger') == -1, //是否为微信浏览器
+        uc: u.indexOf('UCBrowser') > -1 //是否为android下的UC浏览器
+      };
+    }()
+  }
+  console.log("userAgent:" + browser.versions.userAgent);
+
+  // callback
+  function fontLoaded() {
+    console.log('font loaded');
+    if (document.getElementsByClassName('site-intro-meta')) {
+      document.getElementsByClassName('intro-title')[0].classList.add('intro-fade-in');
+      document.getElementsByClassName('intro-subtitle')[0].classList.add('intro-fade-in');
+      var postIntros = document.getElementsByClassName('post-intros')[0]
+      if (postIntros) {
+        postIntros.classList.add('post-fade-in');
+      }
+    }
+  }
+
+  // UC不支持跨域，所以直接显示
+  function asyncCb(){
+    if (browser.versions.uc) {
+      console.log("UCBrowser");
+      fontLoaded();
+    } else {
+      WebFont.load({
+        custom: {
+          families: ['Oswald-Regular']
+        },
+        loading: function () {  //所有字体开始加载
+          // console.log('loading');
+        },
+        active: function () {  //所有字体已渲染
+          fontLoaded();
+        },
+        inactive: function () { //字体预加载失败，无效字体或浏览器不支持加载
+          console.log('inactive: timeout');
+          fontLoaded();
+        },
+        timeout: 5000 // Set the timeout to two seconds
+      });
+    }
+  }
+
+  function asyncErr(){
+    console.warn('script load from CDN failed, will load local script')
+  }
+
+  // load webfont-loader async, and add callback function
+  function async(u, cb, err) {
+    var d = document, t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = u;
+    if (cb) { o.addEventListener('load', function (e) { cb(null, e); }, false); }
+    if (err) { o.addEventListener('error', function (e) { err(null, e); }, false); }
+    s.parentNode.insertBefore(o, s);
+  }
+
+  var asyncLoadWithFallBack = function(arr, success, reject) {
+      var currReject = function(){
+        reject()
+        arr.shift()
+        if(arr.length)
+          async(arr[0], success, currReject)
+        }
+
+      async(arr[0], success, currReject)
+  }
+
+  asyncLoadWithFallBack([
+    "https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js", 
+    "https://cdn.bootcss.com/webfont/1.6.28/webfontloader.js",
+    "/lib/webfontloader.min.js"
+  ], asyncCb, asyncErr)
+</script>        
+        <img class="loading" src="/assets/loading.svg" style="display: block; margin: 6rem auto 0 auto; width: 6rem; height: 6rem;" />
+        <div class="container container-unloaded">
+            <main class="main post-page">
+    <article class="article-entry">
+        <p>《Javascript高级程序设计》学习笔记三</p>
+<p>这是我在学习Js红皮书的学习记录</p>
+<p>本篇笔记主要记录了函数表达式、闭包方面的知识</p>
+<a id="more"></a>
+
+<h3 id="函数表达式"><a href="#函数表达式" class="headerlink" title="函数表达式"></a>函数表达式</h3><p>定义函数的两种方式：</p>
+<ul>
+<li><p>函数声明</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">functionName</span>(<span class="params">arg0, arg1, arg2</span>)</span>&#123;</span><br><span class="line">	<span class="comment">// dosomething</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>函数表达式</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> functionName = <span class="function"><span class="keyword">function</span>(<span class="params">arg0, arg1, arg2</span>)</span>&#123;</span><br><span class="line">	<span class="comment">// dosomething</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<p>虽然以上两种方式都创建了名为<code>functionName</code>的函数，但两者还是有区别的：</p>
+<ul>
+<li><p>函数声明会产生函数声明提升。在全部代码执行前，解析器会先读取函数声明并添加到执行环境中，即相当于函数都是在代码一开始就声明了的。这意味着可以把函数声明放在调用它的语句之后，调用时也不会报未定义的错误；</p>
+</li>
+<li><p>函数表达式类似赋值语句，将一个匿名函数赋值给了一个变量。因此，与其他表达式一样，使用前必须先赋值。</p>
+</li>
+</ul>
+<h3 id="函数递归"><a href="#函数递归" class="headerlink" title="函数递归"></a>函数递归</h3><p>递归通常是通过调用自身实现的，如下求阶乘的函数：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">factorial</span>(<span class="params">num</span>)</span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(num &lt;= <span class="number">1</span>)&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> num * factorial(num - <span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>但通过名字的直接调用自身可能会导致错误：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> anotherFactorial = factorial;</span><br><span class="line">factorial = <span class="literal">null</span>;</span><br><span class="line">alert(anotherFactorial(<span class="number">4</span>)); <span class="comment">// 出错</span></span><br></pre></td></tr></table></figure>
+
+<p>上述代码把函数保存在另一个变量中，然后将<code>factorial</code>变量置空，那么接下来在调用函数时，由于函数中的<code>factorial</code>不再是函数了，所以会导致错误。此时，使用<code>arguments.callee</code>代替函数中的<code>factorial</code>可以解决问题，这是一个指向正在执行函数的指针（即指向自己）。</p>
+<p>但严格模式下对于<code>arguments.callee</code>无法访问，可以通过以下方式：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> factorial = (<span class="function"><span class="keyword">function</span> <span class="title">f</span>(<span class="params">num</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(num &lt;= <span class="number">1</span>)&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> num * f(num - <span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>以上代码创建了一个名为<code>f()</code>的❓<u><strong>命名函数表达式</strong></u>❓并赋值给变量<code>factorial</code>，此时即使把函数赋值给了另一个变量，名字<code>f</code>仍然有效。</p>
+<h3 id="闭包"><a href="#闭包" class="headerlink" title="闭包"></a>闭包</h3><h4 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h4><p>闭包是一个非常强大的功能，是指有权访问另一个函数作用域中的变量的函数。创建闭包的常见方式就是在函数内部创建另一个函数，由于作用链的关系（内部函数的作用链包含外部函数的作用链），内部的函数可以访问外部函数中的变量。同时，即使内部函数被返回了并在其他地方调用，它仍然可以访问到原来的变量。</p>
+<p>书中的例子如下（这个函数的功能是用于创建基于对象不同属性的比较函数，用于排序）：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">createComparisonFunction</span>(<span class="params">propertyName</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="function"><span class="keyword">function</span>(<span class="params">object1, object2</span>)</span>&#123;</span><br><span class="line">        <span class="keyword">var</span> value1 = object1[propertyName];</span><br><span class="line">        <span class="keyword">var</span> value2 = object2[propertyName];</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span>(value1 &lt; value2)&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        &#125;<span class="keyword">else</span> <span class="keyword">if</span>(value1 &gt; value2)&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>之所以会产生内部函数返回后仍然可以访问外部函数变量这种神奇的现象，就要理解作用域链的相关知识：</p>
+<ul>
+<li>当某个函数被调用时，会创建一个执行环境（execution context），其中包含相应的作用域链。然后使用<code>arguments</code>和其他命名参数的值初始化函数的活动对象（或变量对象，activation object）。活动对象存在于作用域链中，并且当前函数的活动对象排在第一位，外部函数的活动对象排在第二位…直至全局执行环境的活动对象。</li>
+<li>当函数执行，需要读写变量时，就会到作用域链中查找对应的变量。作用域链本质上相当于一个指向变量对象的指针列表，只是引用但不实际包含变量对象。</li>
+<li>全局环境的活动对象始终存在，而一般情况下函数执行完毕后，其局部活动对象就会被销毁。</li>
+<li>但对于闭包，这个在一个函数内部定义的函数会将外部函数的活动对象添加到它的作用域链上，这样内部的函数才可以访问外部函数的变量。但在其被返回后，这个被返回的匿名函数的作用域链仍然引用着外部函数的活动对象，导致了外部函数的活动对象不会被销毁。也就是说，外部函数返回后，其执行环境的作用域链虽然销毁了，但它的活动对象仍然会留在内存中，直到匿名函数被销毁（置空），引用解除。</li>
+</ul>
+<h4 id="副作用"><a href="#副作用" class="headerlink" title="副作用"></a>副作用</h4><h5 id="变量"><a href="#变量" class="headerlink" title="变量"></a>变量</h5><p>我们回顾一下前文所说的，闭包现象的发生是因为保存了外部函数的整个活动对象，并且是通过作用域链引用这个对象。因此，其保存的不是一个特定时刻的特殊值，之后的调用只能取得外部函数任何变量的最终值。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">createFunctions</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">	<span class="keyword">var</span> result = <span class="keyword">new</span> <span class="built_in">Array</span>();</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++)&#123;</span><br><span class="line">        result[i] = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">          <span class="keyword">return</span> i;  </span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上述代码中得到的函数数组都返回10，因为它们引用着同一个保存变量<code>i</code>活动对象，该对象中<code>i</code>的值为10。</p>
+<p>当然，也有解决方法：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">createFunctions</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">	<span class="keyword">var</span> result = <span class="keyword">new</span> <span class="built_in">Array</span>();</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++)&#123;</span><br><span class="line">        result[i] = <span class="function"><span class="keyword">function</span>(<span class="params">num</span>)</span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">                <span class="keyword">return</span> num;</span><br><span class="line">            &#125;;</span><br><span class="line">        &#125;(i);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们没有直接把闭包赋值给数组，而是定义了一个匿名函数，并把这个匿名函数立即执行后的结果赋给数组。由于函数参数是按值传递的，所以每次循环时，变量<code>i</code>的当前值被复制给变量<code>num</code>，而在匿名函数内部，又创建并返回了一个访问<code>num</code>的闭包，这样一来，<code>result</code>数组中每个函数就有自己的<code>num</code>变量副本了，不再是同一个！</p>
+<h5 id="this对象"><a href="#this对象" class="headerlink" title="this对象"></a>this对象</h5><p>首先看以下代码：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> name = <span class="string">"The window"</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> object = &#123;</span><br><span class="line">    name: <span class="string">"My Object"</span>,</span><br><span class="line">    getNameFunc: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">this</span>.name;</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">alert(object.getNameFunc()()); <span class="comment">//"The window"(非严格模式下)</span></span><br></pre></td></tr></table></figure>
+
+<p>以上代码在对象中定义了一个方法，该方法返回一个匿名函数，而匿名函数又返回<code>this.name</code>。但我们可以看到，最终的结果为<code>The window</code>，即匿名函数并没有取得外部函数的<code>this</code>对象。</p>
+<p>原因是：每个函数在被调用时都会自动取得两个特殊变量：<code>this</code>和<code>arguments</code>，内部函数在搜索这两个变量时，只会搜索到自己的活动对象，也就是说内部函数不可能访问到外部函数的这两个变量，也就不存在保存不保存的问题了。</p>
+<p>不过，也是有方法实现闭包对于外部函数的<code>this</code>对象的访问的：</p>
+<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> name = <span class="string">"The window"</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> object = &#123;</span><br><span class="line">    name: <span class="string">"My Object"</span>,</span><br><span class="line">    getNameFunc: <span class="function"><span class="keyword">function</span><span class="params">()</span></span>&#123;</span><br><span class="line">    	<span class="keyword">var</span> that = <span class="keyword">this</span>;</span><br><span class="line">        <span class="keyword">return</span> <span class="function"><span class="keyword">function</span><span class="params">()</span></span>&#123;</span><br><span class="line">            <span class="keyword">return</span> that.name;</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">alert(object.getNameFunc()()); <span class="comment">//"My Object"(非严格模式下)</span></span><br></pre></td></tr></table></figure>
+
+<p>以上代码将外部函数的<code>this</code>赋值给一个变量<code>that</code>，这样内部函数在搜索<code>that</code>变量时就可以访问到这个外部函数定义的变量了，同时返回后仍然引用着<code>that</code>。</p>
+<h5 id="内存"><a href="#内存" class="headerlink" title="内存"></a>内存</h5><p>需要注意的是，基于前文的分析我们可以看到，闭包会引用外部函数的整个活动对象，只要匿名函数存在，活动对象所占内存不会被回收。因此闭包会比其他函数占更多的内存，过度使用闭包可能会导致内存占用过多。</p>
+<h3 id="闭包使用"><a href="#闭包使用" class="headerlink" title="闭包使用"></a>闭包使用</h3><h4 id="模仿块级作用域"><a href="#模仿块级作用域" class="headerlink" title="模仿块级作用域"></a>模仿块级作用域</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">outputNumbers</span>(<span class="params">count</span>)</span>&#123;</span><br><span class="line">	<span class="keyword">for</span>(<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; count; i++)&#123;</span><br><span class="line">        alert(i);</span><br><span class="line">    &#125;	</span><br><span class="line">    alert(i);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Javascript中没有块级作用域，以上代码中在循环外还可以访问到变量<code>i</code>。原因是：在块语句中定义的变量，实际上是在包含函数中而非块语句中创建的，即变量<code>i</code>是定义在包含函数的活动对象中的，因此从有定义开始，在函数内部随处都可以访问。</p>
+<p>通过闭包，我们还可以模仿块级作用域：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="comment">// 这里是块级作用域</span></span><br><span class="line">&#125;)();</span><br></pre></td></tr></table></figure>
+
+<p>以上代码定义并立即调用了一个匿名函数并立即调用。将函数声明包含在一对圆括号中，表示实际上是一个函数表达式，即我们直接用函数表达式的值取代了函数名的位置。（注意一定要给函数体加括号，因为如果直接用<code>function</code>开头，会被认为是函数声明的开始，不允许后面立即跟圆括号，而函数表达式可以）</p>
+<p>用这样的方式，相当于我们将变量定义在了匿名函数的活动对象中，而匿名函数在立即执行结束后就会被销毁了。而块级作用域又能访问到外部变量，因为它是一个闭包。</p>
+<p>以上技术经常被用在全局作用域中以限制向全局作用域中添加过多的变量和函数，防止合作开发时过多的全局变量和函数导致的命名冲突。</p>
+<h4 id="私有变量"><a href="#私有变量" class="headerlink" title="私有变量"></a>私有变量</h4><p>严格来讲，JavaScript中没有私有成员的概念，所有对象属性都是公开的，但确实有一个类似私有变量的概念，即我们在函数中定义的变量在函数的外部是不能访问的。但结合我们上文提到的闭包，其作用就是在外部访问内部的变量，那么，我们是否可以利用闭包，实现用于访问私有变量的公有方法呢？答案是肯定的。这种方法称为特权方法，创建方式有两种：</p>
+<h5 id="在构造函数中定义"><a href="#在构造函数中定义" class="headerlink" title="在构造函数中定义"></a>在构造函数中定义</h5><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">MyObject</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="comment">// 私有变量和私有函数</span></span><br><span class="line">    <span class="keyword">var</span> privateVariable = <span class="number">10</span>;</span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">privateFunction</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 特权方法</span></span><br><span class="line">	<span class="keyword">this</span>.publicMethod = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        privateVariable++;</span><br><span class="line">        <span class="keyword">return</span> privateFunction();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上述特权方法作为闭包有权访问在构造函数中定义的所有变量和函数。在用上述构造函数创建对象实例后，除了使用特权方法，是没有其他办法访问到私有变量和方法的，因此，使用这种技巧可以隐藏那些不应该被直接修改的数据。</p>
+<p>在构造函数中定义特权方法有一个缺点，就是针对每个实例都会创建同样的新方法，因此，可以使用静态私有变量来实现特权方法。</p>
+<h5 id="在原型上定义静态私有变量"><a href="#在原型上定义静态私有变量" class="headerlink" title="在原型上定义静态私有变量"></a>在原型上定义静态私有变量</h5><p>通过在私有作用域中定义私有变量和函数：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">(<span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="comment">// 私有变量和私有函数</span></span><br><span class="line">    <span class="keyword">var</span> privateVariable = <span class="number">10</span>;</span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">privateFunction</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;    </span><br><span class="line">    <span class="comment">// 构造函数</span></span><br><span class="line">    MyObject = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        </span><br><span class="line">    &#125;;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 公有/特权方法</span></span><br><span class="line">    MyObject.prototype.publicMethod = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        privateVariable++;</span><br><span class="line">        <span class="keyword">return</span> privateFunction();</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;)();</span><br></pre></td></tr></table></figure>
+
+<p>这个模式创建了一个私有作用域，并在其中定义了私有变量和私有函数，然后定义了构造函数和公有方法，公有方法在原型上定义。</p>
+<p><strong>需要注意的是，这个模式在定义构造函数时使用的是函数表达式，因为函数声明只能创建局部函数，而我们需要在外部也可以使用这个构造函数。同时，表达式没有使用<code>var</code>也是出于同样的目的目的就是创建一个全局变量。（但也要知道，在严格模式下，给未经声明的变量赋值会导致错误，所以我们可以先提前声明好。）</strong></p>
+<p>这个模式和在构造函数中定义特权方法的主要区别在于实现了代码复用，但私有变量是由实例共享的。因为我们把特权方法定义在了原型上，所有实例使用这同一个函数，而这个特权方法作为闭包保存着对包含作用域活动对象的引用，所有私有变量也就是静态且共享的了，在任何实例中改变会影响其他所有实例。</p>
+<h3 id="模块模式"><a href="#模块模式" class="headerlink" title="模块模式"></a>模块模式</h3><h4 id="创建单例"><a href="#创建单例" class="headerlink" title="创建单例"></a>创建单例</h4><p>前面的模式是为自定义类型创建私有变量和特权方法的，还有一种模块模式（module pattern）则是为单例创建私有变量和特权方法的。所谓单例，即只有一个实例对象，说白了就是以字面量方式创建的单例对象.</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> singleton = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="comment">// 私有变量和私有函数</span></span><br><span class="line">    <span class="keyword">var</span> privateVariable = <span class="number">10</span>;</span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">privateFunction</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;   </span><br><span class="line">    <span class="comment">// 特权/公有方法和属性</span></span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">        publicVariable: <span class="literal">true</span>,</span><br><span class="line">        publicMethod: <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">            privateVariable++;</span><br><span class="line">        	<span class="keyword">return</span> privateFunction(); </span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;();</span><br></pre></td></tr></table></figure>
+
+<p>看代码我们可以知道，这个模式返回了一个对象（对象字面量），返回的对象字面量只能访问公开的属性和方法，而公有方法作为闭包可以访问到私有变量和函数。注意到这里的函数立即执行不需要像上面一样套括号了，应该是这里是函数表达式的原因。</p>
+<p>这种模式创建的单例都是Object的实例，因为是通过对象字面量的方式表示的。</p>
+<h4 id="创建特定类型的单例"><a href="#创建特定类型的单例" class="headerlink" title="创建特定类型的单例"></a>创建特定类型的单例</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> singleton = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">    <span class="comment">// 私有变量和私有函数</span></span><br><span class="line">    <span class="keyword">var</span> privateVariable = <span class="number">10</span>;</span><br><span class="line">    <span class="function"><span class="keyword">function</span> <span class="title">privateFunction</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;   </span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 创建特定类型对象</span></span><br><span class="line">    <span class="keyword">var</span> object = <span class="keyword">new</span> CustomType();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 添加特权/公有方法和属性</span></span><br><span class="line">    object.publicVariable = <span class="literal">true</span>,</span><br><span class="line">    object.publicMethod = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">        privateVariable++;</span><br><span class="line">     	<span class="keyword">return</span> privateFunction(); </span><br><span class="line">    &#125;;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 返回对象</span></span><br><span class="line">    <span class="keyword">return</span> object;</span><br><span class="line">&#125;();</span><br></pre></td></tr></table></figure>
+
+
+    </article>
+    <!-- license  -->
+    
+        <div class="license-wrapper">
+            <p>原文作者：<a href="http://yoursite.com">Daniel Xu</a>
+            <p>原文链接：<a href="http://yoursite.com/2019/11/26/《Javascript高级程序设计》学习-闭包/">http://yoursite.com/2019/11/26/《Javascript高级程序设计》学习-闭包/</a>
+            <p>发表日期：<a href="http://yoursite.com/2019/11/26/《Javascript高级程序设计》学习-闭包/">November 26th 2019, 10:18:45 am</a>
+            <p>更新日期：<a href="http://yoursite.com/2019/11/26/《Javascript高级程序设计》学习-闭包/">February 18th 2020, 10:27:37 pm</a>
+            <p>版权声明：本文采用<a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/">知识共享署名-非商业性使用 4.0 国际许可协议</a>进行许可</p>
+        </div>
+    
+    <!-- paginator  -->
+    <ul class="post-paginator">
+        <li class="next">
+            
+                <div class="nextSlogan">Next Post</div>
+                <a href= "/2019/12/01/3D-Game-Programming-Design-游戏智能/" title= "3D Game Programming & Design - 游戏智能">
+                    <div class="nextTitle">3D Game Programming & Design - 游戏智能</div>
+                </a>
+            
+        </li>
+        <li class="previous">
+            
+                <div class="prevSlogan">Previous Post</div>
+                <a href= "/2019/11/24/CSS布局学习-圣杯、双飞翼布局/" title= "CSS布局学习 | 圣杯、双飞翼布局">
+                    <div class="prevTitle">CSS布局学习 | 圣杯、双飞翼布局</div>
+                </a>
+            
+        </li>
+    </ul>
+    <!-- 评论插件 -->
+    <!-- 来必力City版安装代码 -->
+
+<!-- City版安装代码已完成 -->
+    
+    <div id="disqus_thread"></div>
+    <script>
+        /**
+    *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+    *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
+        
+        var disqus_config = function () {
+        this.page.url = "http://yoursite.com/2019/11/26/《Javascript高级程序设计》学习-闭包/";  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = "《Javascript高级程序设计》学习 | 闭包"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        };
+        
+        (function () { // DON'T EDIT BELOW THIS LINE
+            var d = document, s = d.createElement('script');
+            s.src = 'https://danielxus-blog.disqus.com/embed.js';
+            s.setAttribute('data-timestamp', +new Date());
+            (d.head || d.body).appendChild(s);
+        })();
+
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+    
+    <!-- partial('_partial/comment/changyan') -->
+    <!--PC版-->
+
+
+    
+    
+
+    <!-- 评论 -->
+</main>
+            <!-- profile -->
+            
+        </div>
+        <footer class="footer footer-unloaded">
+    <!-- social  -->
+    
+    <div class="social">
+        
+    
+        
+            
+                <a href="mailto:979223119@qq.com" class="iconfont-archer email" title=email ></a>
+            
+        
+    
+        
+            
+                <a href="//github.com/DanielXuuuuu" class="iconfont-archer github" target="_blank" title=github></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+            
+                <a href="//juejin.im/user/5db9293ce51d452a0a3afbab" class="iconfont-archer juejin" target="_blank" title=juejin></a>
+            
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+    </div>
+    
+    <!-- powered by Hexo  -->
+    <div class="copyright">
+        <span id="hexo-power">Powered by <a href="https://hexo.io/" target="_blank">Hexo</a></span><span class="iconfont-archer power">&#xe635;</span><span id="theme-info">theme <a href="https://github.com/fi3ework/hexo-theme-archer" target="_blank">Archer</a></span>
+    </div>
+    <!-- 不蒜子  -->
+    
+    <div class="busuanzi-container">
+    
+     
+    <span id="busuanzi_container_site_pv">PV: <span id="busuanzi_value_site_pv"></span> :)</span>
+    
+    </div>
+    
+</footer>
+    </div>
+    <!-- toc -->
+    
+    <div class="toc-wrapper" style=
+    
+
+
+
+
+
+
+
+top:50vh;
+
+    >
+        <div class="toc-catalog">
+            <span class="iconfont-archer catalog-icon">&#xe613;</span><span>CATALOG</span>
+        </div>
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#函数表达式"><span class="toc-number">1.</span> <span class="toc-text">函数表达式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#函数递归"><span class="toc-number">2.</span> <span class="toc-text">函数递归</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#闭包"><span class="toc-number">3.</span> <span class="toc-text">闭包</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#原理"><span class="toc-number">3.1.</span> <span class="toc-text">原理</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#副作用"><span class="toc-number">3.2.</span> <span class="toc-text">副作用</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#变量"><span class="toc-number">3.2.1.</span> <span class="toc-text">变量</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#this对象"><span class="toc-number">3.2.2.</span> <span class="toc-text">this对象</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#内存"><span class="toc-number">3.2.3.</span> <span class="toc-text">内存</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#闭包使用"><span class="toc-number">4.</span> <span class="toc-text">闭包使用</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#模仿块级作用域"><span class="toc-number">4.1.</span> <span class="toc-text">模仿块级作用域</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#私有变量"><span class="toc-number">4.2.</span> <span class="toc-text">私有变量</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#在构造函数中定义"><span class="toc-number">4.2.1.</span> <span class="toc-text">在构造函数中定义</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#在原型上定义静态私有变量"><span class="toc-number">4.2.2.</span> <span class="toc-text">在原型上定义静态私有变量</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#模块模式"><span class="toc-number">5.</span> <span class="toc-text">模块模式</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#创建单例"><span class="toc-number">5.1.</span> <span class="toc-text">创建单例</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#创建特定类型的单例"><span class="toc-number">5.2.</span> <span class="toc-text">创建特定类型的单例</span></a></li></ol></li></ol>
+    </div>
+    
+    <div class="back-top iconfont-archer">&#xe639;</div>
+    <div class="sidebar sidebar-hide">
+    <ul class="sidebar-tabs sidebar-tabs-active-0">
+        <li class="sidebar-tab-archives"><span class="iconfont-archer">&#xe67d;</span><span class="tab-name">Archive</span></li>
+        <li class="sidebar-tab-tags"><span class="iconfont-archer">&#xe61b;</span><span class="tab-name">Tag</span></li>
+        <li class="sidebar-tab-categories"><span class="iconfont-archer">&#xe666;</span><span class="tab-name">Cate</span></li>
+    </ul>
+    <div class="sidebar-content sidebar-content-show-archive">
+          <div class="sidebar-panel-archives">
+    <!-- 在ejs中将archive按照时间排序 -->
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <div class="total-and-search">
+        <div class="total-archive">
+        Total : 22
+        </div>
+        <!-- search  -->
+        
+    </div>
+    
+    <div class="post-archive">
+    
+    
+    
+    
+    <div class="archive-year"> 2019 </div>
+    <ul class="year-list">
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/29</span><a class="archive-post-title" href= "/2019/12/29/CSS布局学习-｜-两列等高布局/" >CSS布局学习｜两列等高布局</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/16</span><a class="archive-post-title" href= "/2019/12/16/3D-Game-Programming-Design-AR小游戏/" >3D-Game-Programming-Design | AR小游戏</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/14</span><a class="archive-post-title" href= "/2019/12/14/Sevice-Computing-初识Docker/" >Sevice-Computing | 初识Docker</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">12/01</span><a class="archive-post-title" href= "/2019/12/01/3D-Game-Programming-Design-游戏智能/" >3D Game Programming & Design - 游戏智能</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/26</span><a class="archive-post-title" href= "/2019/11/26/《Javascript高级程序设计》学习-闭包/" >《Javascript高级程序设计》学习 | 闭包</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/24</span><a class="archive-post-title" href= "/2019/11/24/CSS布局学习-圣杯、双飞翼布局/" >CSS布局学习 | 圣杯、双飞翼布局</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/22</span><a class="archive-post-title" href= "/2019/11/22/《Javascript高级程序设计》学习-对象、原型/" >《Javascript高级程序设计》学习 | 对象、原型</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/19</span><a class="archive-post-title" href= "/2019/11/19/《Javascript高级程序设计》学习-函数、变量、作用域/" >《Javascript高级程序设计》学习 | 函数、变量、作用域</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/18</span><a class="archive-post-title" href= "/2019/11/18/MD5算法的C语言实现/" >MD5算法的C语言实现</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">11/17</span><a class="archive-post-title" href= "/2019/11/17/3D-Game-Programming-Design-UI系统/" >3D-Game-Programming-Design-UI系统</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/29</span><a class="archive-post-title" href= "/2019/10/29/3D-Game-Programming-Design-粒子系统/" >3D-Game-Programming-Design-粒子系统</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/24</span><a class="archive-post-title" href= "/2019/10/24/3D-Game-Programming-Design-模型与动画/" >3D-Game-Programming-Design-模型与动画</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/17</span><a class="archive-post-title" href= "/2019/10/17/3D-Game-Programming-Design-物理系统与碰撞/" >3D-Game-Programming-Design - 物理系统与碰撞</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/15</span><a class="archive-post-title" href= "/2019/10/15/浅谈PoW（Proof-of-Work）共识机制/" >浅谈PoW（Proof of Work）共识机制</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">10/06</span><a class="archive-post-title" href= "/2019/10/06/3D-Game-Programming-Design-与游戏世界交互/" >3D-Game-Programming-Design-与游戏世界交互</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/22</span><a class="archive-post-title" href= "/2019/09/22/3D-Game-Programming-Design-游戏对象与图形基础/" >3D-Game-Programming-Design-游戏对象与图形基础</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/16</span><a class="archive-post-title" href= "/2019/09/16/3D-Game-Programming-Design-空间与运动/" >3D Game Programming & Design - 空间与运动</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/12</span><a class="archive-post-title" href= "/2019/09/12/初次接触Go语言/" >初次接触Go语言</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/10</span><a class="archive-post-title" href= "/2019/09/10/Sevice-Computing-在Linux中安装配置Go开发环境/" >Sevice Computing - 在Linux中安装配置Go开发环境</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/04</span><a class="archive-post-title" href= "/2019/09/04/3D-Game-Programming-Design-离散仿真引擎基础/" >3D Game Programming & Design - 离散仿真引擎基础</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/01</span><a class="archive-post-title" href= "/2019/09/01/Human Resource Machine - 一款杂糅了编程元素的另类解谜游戏/" >Human Resource Machine - 一款杂糅了编程元素的另类解谜游戏</a>
+        </li>
+    
+    
+        <li class="archive-post-item">
+            <span class="archive-post-date">09/01</span><a class="archive-post-title" href= "/2019/09/01/Sevice-Computing-Windows环境下使用VirtualBox搭建云桌面/" >Sevice Computing - Windows环境下使用VirtualBox搭建云桌面</a>
+        </li>
+    
+    </div>
+  </div>
+        <div class="sidebar-panel-tags">
+    <div class="sidebar-tags-name">
+    
+        <span class="sidebar-tag-name" data-tags="课程作业"><span class="iconfont-archer">&#xe606;</span>课程作业</span>
+    
+        <span class="sidebar-tag-name" data-tags="Unity"><span class="iconfont-archer">&#xe606;</span>Unity</span>
+    
+        <span class="sidebar-tag-name" data-tags="CSS"><span class="iconfont-archer">&#xe606;</span>CSS</span>
+    
+        <span class="sidebar-tag-name" data-tags="前端"><span class="iconfont-archer">&#xe606;</span>前端</span>
+    
+        <span class="sidebar-tag-name" data-tags="编程游戏"><span class="iconfont-archer">&#xe606;</span>编程游戏</span>
+    
+        <span class="sidebar-tag-name" data-tags="解谜"><span class="iconfont-archer">&#xe606;</span>解谜</span>
+    
+        <span class="sidebar-tag-name" data-tags="MD5"><span class="iconfont-archer">&#xe606;</span>MD5</span>
+    
+        <span class="sidebar-tag-name" data-tags="c"><span class="iconfont-archer">&#xe606;</span>c</span>
+    
+        <span class="sidebar-tag-name" data-tags="云桌面"><span class="iconfont-archer">&#xe606;</span>云桌面</span>
+    
+        <span class="sidebar-tag-name" data-tags="服务计算"><span class="iconfont-archer">&#xe606;</span>服务计算</span>
+    
+        <span class="sidebar-tag-name" data-tags="CentOS"><span class="iconfont-archer">&#xe606;</span>CentOS</span>
+    
+        <span class="sidebar-tag-name" data-tags="ssh"><span class="iconfont-archer">&#xe606;</span>ssh</span>
+    
+        <span class="sidebar-tag-name" data-tags="Docker"><span class="iconfont-archer">&#xe606;</span>Docker</span>
+    
+        <span class="sidebar-tag-name" data-tags="Go语言"><span class="iconfont-archer">&#xe606;</span>Go语言</span>
+    
+        <span class="sidebar-tag-name" data-tags="Javascript"><span class="iconfont-archer">&#xe606;</span>Javascript</span>
+    
+        <span class="sidebar-tag-name" data-tags="PoW共识机制"><span class="iconfont-archer">&#xe606;</span>PoW共识机制</span>
+    
+        <span class="sidebar-tag-name" data-tags="区块链"><span class="iconfont-archer">&#xe606;</span>区块链</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-tags-empty">&#xe678;</div>
+    <div class="tag-load-fail" style="display: none; color: #ccc; font-size: 0.6rem;">
+    缺失模块。<br/>
+    1、请确保node版本大于6.2<br/>
+    2、在博客根目录（注意不是archer根目录）执行以下命令：<br/>
+    <span style="color: #f75357; font-size: 1rem; line-height: 2rem;">npm i hexo-generator-json-content --save</span><br/>
+    3、在根目录_config.yml里添加配置：
+    <pre style="color: #787878; font-size: 0.6rem;">
+jsonContent:
+  meta: false
+  pages: false
+  posts:
+    title: true
+    date: true
+    path: true
+    text: false
+    raw: false
+    content: false
+    slug: false
+    updated: false
+    comments: false
+    link: false
+    permalink: false
+    excerpt: false
+    categories: true
+    tags: true</pre>
+    </div> 
+    <div class="sidebar-tags-list"></div>
+</div>
+        <div class="sidebar-panel-categories">
+    <div class="sidebar-categories-name">
+    
+        <span class="sidebar-category-name" data-categories="3D游戏编程"><span class="iconfont-archer">&#xe60a;</span>3D游戏编程</span>
+    
+        <span class="sidebar-category-name" data-categories="CSS学习笔记"><span class="iconfont-archer">&#xe60a;</span>CSS学习笔记</span>
+    
+        <span class="sidebar-category-name" data-categories="信息安全"><span class="iconfont-archer">&#xe60a;</span>信息安全</span>
+    
+        <span class="sidebar-category-name" data-categories="服务计算"><span class="iconfont-archer">&#xe60a;</span>服务计算</span>
+    
+        <span class="sidebar-category-name" data-categories="Javascript学习笔记"><span class="iconfont-archer">&#xe60a;</span>Javascript学习笔记</span>
+    
+        <span class="sidebar-category-name" data-categories="区块链"><span class="iconfont-archer">&#xe60a;</span>区块链</span>
+    
+    </div>
+    <div class="iconfont-archer sidebar-categories-empty">&#xe678;</div>
+    <div class="sidebar-categories-list"></div>
+</div>
+    </div>
+</div> 
+    <script>
+    var siteMeta = {
+        root: "/",
+        author: "Daniel Xu"
+    }
+</script>
+    <!-- CDN failover -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        if (typeof window.$ === 'undefined')
+        {
+            console.warn('jquery load from jsdelivr failed, will load local script')
+            document.write('<script src="/lib/jquery.min.js">\x3C/script>')
+        }
+    </script>
+    <script src="/scripts/main.js"></script>
+    <!-- algolia -->
+    
+    <!-- busuanzi  -->
+    
+    <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    
+    <!-- CNZZ  -->
+    
+    </div>
+    <!-- async load share.js -->
+    
+        <script src="/scripts/share.js" async></script>    
+     
+    </body>
+</html>
+
+

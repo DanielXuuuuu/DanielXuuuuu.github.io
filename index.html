@@ -366,10 +366,8 @@ height:50vh;
         <div class="abstract-content">
             现象当两个display值为inline-block的元素并列时，元素之间会出现神秘的间距。
 inline元素也有相同现象。
-原因造成「inline-block」元素空隙的本质是HTML中存在的空白符（whitespace）。由于对于西文来说，是使用空格作为单词之间的分界的，所以在HTML被解析时，inline或者inline-block元素的标签之间的空格或者换行被看成相当于文字间隙，自动的产生了间距。
-因此，当inline或者inline-block元素的HTML标签之间存在换行或使用空格分隔的情况下会有间距。
-解决方法假设HTML如下：
-12345&lt;ul&gt;  &lt;l...
+原因造成「inline-block」元素空隙的本质是HTML中存在的空白符（white space）。由于对于西文来说，是使用空格作为单词之间的分界的，所以在HTML被解析时，inline或者inline-block元素的标签之间的空格或者换行被看成相当于文字间隙，产生了一些看不见的字符，CSS的white-space属性会作用于这些字符，产生了内容，占据了空间，产生了水平方向上的“间隙”效果；
+因此，当inline或者inline-block元素的HTML标签之...
         </div>
         <div class="abstract-post-meta">
             <!-- date  -->
